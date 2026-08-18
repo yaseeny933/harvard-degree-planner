@@ -644,22 +644,34 @@ function courseRow(c,clash){
       <div class="foot">${c.cr||'?'}cr · ${dates}${c.inst?' · '+esc(c.inst.split(';')[0]):''}</div></div>
     <span class="add">${on?'✓':'+'}</span></li>`;
 }
+function scheduled(c){ return !!(c.days.length && c.start); }
 function passes(c){
   const f=state.filters,q=(state.q||'').trim().toLowerCase();
-  if(!(c.days.length&&c.start)) return false;               // calendar tool: must be placeable
+  // Browsing shows only what can be drawn on the calendar. Searching finds
+  // everything — independent study and field experience publish no meeting
+  // time but still count toward the 42 credits and the 8-credit field cap.
+  if(!scheduled(c) && !q) return false;
   if(q&&!((c.code+' '+c.title+' '+(c.inst||'')).toLowerCase().includes(q)))return false;
   if(f.term&&c.term!==f.term)return false;
   if(f.sch&&c.sch!==f.sch)return false;
   if(f.grade==='letter'&&!/Letter/i.test(c.grade||''))return false;
   if(f.grade==='pf'&&/Letter/i.test(c.grade||''))return false;
+  if(f.fit&&!scheduled(c))return false;
   if(f.fit==='beforePT'&&toMin(c.end)>12*60)return false;
   if(f.fit==='afterPT'&&toMin(c.start)<17*60)return false;
   return true;
 }
 function renderList(clashSet){
   const hits=CATALOG.filter(passes);
-  document.getElementById('catCount').textContent=
-    `${hits.length.toLocaleString()} courses`+(hits.length>50?' · showing first 50':'');
+  hits.sort((a,b)=>(scheduled(b)?1:0)-(scheduled(a)?1:0));   // placeable first
+  const q=(state.q||'').trim();
+  const noTime=hits.filter(c=>!scheduled(c)).length;
+  const hidden=q?0:CATALOG.filter(c=>!scheduled(c)).length;
+  document.getElementById('catCount').innerHTML=
+    `${hits.length.toLocaleString()} course${hits.length===1?'':'s'}`
+    +(hits.length>50?' · showing first 50':'')
+    +(noTime?` · <b>${noTime}</b> with no meeting time`:'')
+    +(hidden?` · ${hidden.toLocaleString()} more without a meeting time — search to find them`:'');
   document.getElementById('catList').innerHTML=
     hits.length?hits.slice(0,50).map(c=>courseRow(c,clashSet.has(c.i))).join(''):'<li class="empty">Nothing matches.</li>';
   document.querySelectorAll('#catList .crow').forEach(r=>r.onclick=()=>{
@@ -855,6 +867,10 @@ function renderVerdicts(list,clash){
   for(const it of list) for(const x of wb)
     if(it.start<x.end&&x.start<it.end){
       W.push(['warn','!',`<b>${it.course.code}</b> runs inside one of your work blocks. Move the block or the course.`]); break; }
+  const noTime=sel().filter(c=>!(c.days.length&&c.start));
+  if(noTime.length) W.push(['warn','!',
+    `<b>${noTime.length}</b> selected course${noTime.length===1?' has':'s have'} no published meeting time `
+    +`(${noTime.slice(0,3).map(c=>c.code).join(', ')}${noTime.length>3?'…':''}) — ${noTime.length===1?'it counts':'they count'} toward your credits but can't be drawn on the calendar.`]);
   if(!state.work||!state.work.length) W.push(['warn','·','No work hours drawn yet — drag on the calendar to block them out.']);
   else if(wh<S.target) W.push(['warn','!',`You've drawn <b>${wh.toFixed(wh%1?1:0)}h</b> of work against a <b>${S.target}h</b> target — <b>${(S.target-wh).toFixed(1)}h</b> short.`]);
   else W.push(['ok','✓',`<b>${wh.toFixed(wh%1?1:0)}h</b> of work drawn — target met.`]);
