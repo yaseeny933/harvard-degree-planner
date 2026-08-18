@@ -3,21 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Plan a part-time Harvard Ed.M. across both terms and 12 schools — real dates, days and two-coast times, tracked against the 42-credit degree.">
+<meta name="description" content="Plan a part-time Harvard Ed.M. across both terms — draw your work hours on the calendar, then build your courses around them.">
 <meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗓</text></svg>">
 <title>Two-Coast Degree Planner</title>
 <style>
   :root{
     --crimson:#a51c30; --crimson-d:#7d1424; --crimson-x:#5f0f1c;
     --ink:#191418; --ink-2:#544b52; --ink-3:#8d8189; --ink-4:#b9adb3;
     --surface:#fff; --canvas:#f4eef0; --sunk:#faf6f7; --line:#e7dcdf; --line-2:#f1e9eb;
-    --seg-class:#a51c30; --seg-study:#eb6834; --seg-work:#2a78d6; --seg-free:#e7dee1;
+    --work:#2a78d6; --work-soft:rgba(42,120,214,.13);
     --ok:#1a7f52; --warn:#a9761b; --bad:#c0392b;
     --ok-bg:#eaf5ef; --warn-bg:#fbf3e3; --bad-bg:#fbecea;
-    --shadow-s:0 1px 2px rgba(60,20,32,.06),0 2px 8px rgba(60,20,32,.05);
-    --shadow-m:0 4px 14px rgba(60,20,32,.09);
-    --shadow-l:0 14px 40px rgba(60,20,32,.14);
+    --sh-s:0 1px 2px rgba(60,20,32,.06),0 2px 8px rgba(60,20,32,.05);
+    --sh-m:0 4px 14px rgba(60,20,32,.09);
     --sans:ui-sans-serif,-apple-system,"SF Pro Text","Segoe UI",Inter,Helvetica,Arial,sans-serif;
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -26,239 +24,208 @@
   body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:14px;
     line-height:1.5;-webkit-font-smoothing:antialiased}
   h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.012em;margin:0}
-  .wrap{max-width:1620px;margin:0 auto;padding:0 20px 70px}
-  .eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
   button{font-family:inherit}
   .num{font-variant-numeric:tabular-nums}
+  .eyebrow{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 
-  .mast{background:linear-gradient(148deg,var(--crimson-x),var(--crimson) 62%,#c0392f);color:#fff;
-    border-radius:0 0 22px 22px;padding:20px 28px 22px;position:relative;overflow:hidden;
-    box-shadow:var(--shadow-l);margin-bottom:16px}
-  .mast::after{content:"";position:absolute;inset:0;opacity:.3;pointer-events:none;
-    background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);
-    background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse at 88% 6%,#000,transparent 66%);
-    mask-image:radial-gradient(ellipse at 88% 6%,#000,transparent 66%)}
-  .mast>*{position:relative;z-index:1}
-  .mast .eyebrow{color:#f0bfc7}
-  .mast h1{font-size:1.95rem;color:#fff;margin-top:5px;line-height:1.08}
-  .mast h1 em{font-style:normal;font-family:var(--mono);font-size:.92rem;letter-spacing:.09em;
-    opacity:.72;vertical-align:.34em;margin-left:10px}
-  .mast .lede{color:#f7d9de;max-width:82ch;font-size:.86rem;margin:7px 0 0;line-height:1.5}
+  /* ───────── status bar ───────── */
+  .bar{position:sticky;top:0;z-index:40;background:linear-gradient(140deg,var(--crimson-x),var(--crimson) 70%,#bc3a30);
+    color:#fff;box-shadow:0 2px 14px rgba(90,20,35,.28)}
+  .bar-in{max-width:1680px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .brand{font-family:var(--serif);font-size:1.12rem;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+  .brand em{font-style:normal;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;opacity:.7;margin-left:7px}
+  .stats{display:flex;gap:20px;flex-wrap:wrap;margin-left:auto;align-items:center}
+  .stat{text-align:right;line-height:1.15}
+  .stat b{font-family:var(--serif);font-size:1.16rem;font-weight:700;display:block}
+  .stat span{font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:#f2c8ce}
+  .stat.alert b{color:#ffd7d2}
+  .barbtn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;
+    border-radius:8px;padding:6px 12px;font-family:var(--mono);font-size:.63rem;letter-spacing:.07em;
+    text-transform:uppercase;cursor:pointer;white-space:nowrap}
+  .barbtn:hover{background:rgba(255,255,255,.24)}
+  .barbtn.on{background:#fff;color:var(--crimson-d);font-weight:700}
 
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-s)}
-  .card+.card{margin-top:15px}
-  .card-b{padding:15px 19px 18px}
-  .card-h{padding:15px 19px 0}
-  .sub{font-size:.79rem;color:var(--ink-2);margin:5px 0 0;line-height:1.45}
+  /* ───────── drawers ───────── */
+  .drawer{display:none;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:var(--sh-s)}
+  .drawer.on{display:block}
+  .drawer-in{max-width:1680px;margin:0 auto;padding:16px 20px 20px}
 
-  /* ---- degree progress ---- */
-  .reqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:1px;background:var(--line-2);
-    border-top:1px solid var(--line)}
-  .req{background:var(--surface);padding:12px 14px}
-  .req .k{font-family:var(--mono);font-size:.55rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
-  .req .v{font-family:var(--serif);font-size:1.34rem;font-weight:700;letter-spacing:-.02em;margin:3px 0 5px;line-height:1.05}
-  .req .v small{font-size:.8rem;color:var(--ink-3);font-weight:400;font-family:var(--mono)}
+  .reqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .req{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--surface)}
+  .req .k{font-family:var(--mono);font-size:.54rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+  .req .v{font-family:var(--serif);font-size:1.3rem;font-weight:700;margin:3px 0 6px;line-height:1.05}
+  .req .v small{font-size:.78rem;color:var(--ink-3);font-weight:400;font-family:var(--mono)}
   .req .track{height:5px;border-radius:3px;background:var(--line-2);overflow:hidden}
-  .req .fill{height:100%;border-radius:3px;background:var(--seg-work);transition:width .35s cubic-bezier(.4,0,.2,1)}
+  .req .fill{height:100%;border-radius:3px;background:var(--work);transition:width .35s}
   .req.ok .fill{background:var(--ok)} .req.warn .fill{background:var(--warn)} .req.bad .fill{background:var(--bad)}
   .req.ok .v{color:var(--ok)} .req.warn .v{color:var(--warn)} .req.bad .v{color:var(--bad)}
-  .req .s{font-family:var(--mono);font-size:.62rem;color:var(--ink-3);margin-top:5px}
+  .req .s{font-family:var(--mono);font-size:.6rem;color:var(--ink-3);margin-top:5px}
 
-  /* ---- term map (gantt) ---- */
-  .tabs2{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
-  .tabs2 button{background:none;border:none;padding:7px 15px;font-family:var(--mono);font-size:.68rem;
-    letter-spacing:.05em;cursor:pointer;color:var(--ink-2);border-right:1px solid var(--line)}
-  .tabs2 button:last-child{border-right:none}
-  .tabs2 button.on{background:var(--crimson);color:#fff;font-weight:700}
-  .gantt{margin-top:12px;position:relative;overflow-x:auto}
-  .gwrap{min-width:640px}
-  .gaxis{display:flex;border-bottom:1px solid var(--line);padding-left:var(--glab);position:relative;height:22px}
-  .gmon{flex:1;font-family:var(--mono);font-size:.58rem;color:var(--ink-3);text-transform:uppercase;
+  .gantt{overflow-x:auto} .gwrap{min-width:620px}
+  .gaxis{display:flex;border-bottom:1px solid var(--line);padding-left:126px;height:20px}
+  .gmon{flex:1;font-family:var(--mono);font-size:.56rem;color:var(--ink-3);text-transform:uppercase;
     letter-spacing:.09em;border-left:1px solid var(--line-2);padding-left:5px}
-  .grow2{display:flex;align-items:center;height:30px;border-bottom:1px solid var(--line-2);position:relative}
+  .grow2{display:flex;align-items:center;height:28px;border-bottom:1px solid var(--line-2)}
   .grow2:hover{background:var(--sunk)}
-  .glab{width:var(--glab);flex:none;font-family:var(--mono);font-size:.64rem;font-weight:700;color:var(--crimson-d);
+  .glab{width:126px;flex:none;font-family:var(--mono);font-size:.63rem;font-weight:700;color:var(--crimson-d);
     padding-right:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .glab s{text-decoration:none;color:var(--ink-3);font-weight:400}
   .gtrack{flex:1;position:relative;height:100%}
-  .gbar{position:absolute;top:6px;height:18px;border-radius:5px;background:var(--c);
-    display:flex;align-items:center;padding:0 7px;overflow:hidden;box-shadow:0 1px 3px rgba(60,20,32,.16)}
-  .gbar span{font-family:var(--mono);font-size:.56rem;color:#fff;white-space:nowrap;
-    text-shadow:0 1px 2px rgba(0,0,0,.35);font-weight:600}
+  .gbar{position:absolute;top:5px;height:18px;border-radius:5px;background:var(--c);display:flex;
+    align-items:center;padding:0 7px;overflow:hidden}
+  .gbar span{font-family:var(--mono);font-size:.55rem;color:#fff;white-space:nowrap;font-weight:600;
+    text-shadow:0 1px 2px rgba(0,0,0,.35)}
   .gbar.undated{background:repeating-linear-gradient(45deg,var(--ink-4) 0 5px,#cfc3c8 5px 10px)}
-  .gnow{position:absolute;top:0;bottom:0;width:2px;background:var(--crimson);opacity:.55;z-index:3}
-  .gempty{padding:26px;text-align:center;color:var(--ink-3);font-size:.84rem;border:1px dashed var(--line);
-    border-radius:11px;background:var(--sunk);margin-top:12px}
 
-  /* ---- week load strip ---- */
-  .tl{display:flex;gap:3px;height:112px;margin-top:14px}
-  .tlw{flex:1;min-width:0;display:flex;flex-direction:column;cursor:pointer;border-radius:6px;padding:1px 1px 0}
-  .tlw:hover{background:rgba(165,28,48,.06)}
-  .tlw .val{font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--ink-3);text-align:center;height:13px;line-height:13px}
-  .tlw.over .val{color:var(--bad)} .tlw.on .val{color:var(--crimson-d)}
-  .tlw .barwrap{flex:1;display:flex;align-items:flex-end;min-height:0}
-  .tlw .bar{width:100%;background:var(--seg-work);border-radius:4px 4px 0 0;min-height:2px;transition:height .3s}
-  .tlw.over .bar{background:var(--bad)}
-  .tlw.on{background:rgba(165,28,48,.1);box-shadow:inset 0 0 0 2px var(--crimson)}
-  .tlw .lab{font-family:var(--mono);font-size:.5rem;color:var(--ink-3);text-align:center;height:17px;
-    line-height:17px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
-  .tlw.on .lab{color:var(--crimson-d);font-weight:700}
-  .tlwrap{position:relative}
-  .tl-ceil{position:absolute;left:0;right:0;border-top:1.5px dashed var(--ink-4);z-index:2;pointer-events:none}
-  .tl-ceil span{position:absolute;right:0;top:-14px;font-family:var(--mono);font-size:.5rem;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--ink-3);background:var(--surface);padding:0 5px}
+  /* ───────── main ───────── */
+  .main{max-width:1680px;margin:0 auto;padding:16px 20px 60px;
+    display:grid;grid-template-columns:352px minmax(0,1fr);gap:16px;align-items:start}
+  @media (max-width:1120px){.main{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh-s)}
+  .pad{padding:14px 16px}
 
-  /* ---- layout ---- */
-  .cols{display:grid;grid-template-columns:392px minmax(0,1fr);gap:18px;align-items:start}
-  @media (max-width:1240px){.cols{grid-template-columns:1fr}}
-  .rail{position:sticky;top:12px}
-  @media (max-width:1240px){.rail{position:static}}
-  .tabs{display:flex;gap:3px;padding:5px;background:var(--sunk);border-bottom:1px solid var(--line);border-radius:14px 14px 0 0}
-  .tabs button{flex:1;background:none;border:none;padding:8px 4px;border-radius:9px;cursor:pointer;
-    font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
-  .tabs button:hover{color:var(--crimson-d);background:rgba(165,28,48,.06)}
-  .tabs button.on{background:var(--surface);color:var(--crimson-d);font-weight:700;box-shadow:var(--shadow-s)}
-  .tabs button .n{display:inline-block;background:var(--crimson);color:#fff;border-radius:99px;padding:0 5px;
-    font-size:.57rem;margin-left:3px;vertical-align:1px}
-  .pane{display:none} .pane.on{display:block}
+  /* ───────── steps ───────── */
+  .step{display:flex;gap:9px;align-items:flex-start;padding:11px 13px;border-radius:10px;
+    background:var(--sunk);border:1px solid var(--line);margin-bottom:11px;font-size:.82rem;line-height:1.45}
+  .step .n{flex:none;width:19px;height:19px;border-radius:50%;background:var(--crimson);color:#fff;
+    font-family:var(--mono);font-size:.62rem;font-weight:700;display:grid;place-items:center;margin-top:1px}
+  .step.done{background:var(--ok-bg);border-color:#c8e4d5}
+  .step.done .n{background:var(--ok)}
+  .step b{font-weight:600}
 
+  /* ───────── find courses ───────── */
   .srch{position:relative;margin-bottom:9px}
-  .srch input{width:100%;padding:9px 11px 9px 31px;border:1px solid var(--line);border-radius:9px;
+  .srch input{width:100%;padding:9px 11px 9px 30px;border:1px solid var(--line);border-radius:9px;
     font-family:var(--sans);font-size:.86rem;background:var(--surface)}
   .srch::before{content:"⌕";position:absolute;left:11px;top:7px;color:var(--ink-4);font-size:1rem}
-  .fgroup{margin-bottom:8px}
-  .fgroup .glab2{font-family:var(--mono);font-size:.52rem;letter-spacing:.11em;text-transform:uppercase;
-    color:var(--ink-4);margin-bottom:4px}
-  .fchips{display:flex;gap:5px;flex-wrap:wrap}
-  .fchip{font-family:var(--mono);font-size:.59rem;padding:4px 9px;border-radius:99px;border:1px solid var(--line);
+  .filt{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
+  .fchip{font-family:var(--mono);font-size:.585rem;padding:4px 9px;border-radius:99px;border:1px solid var(--line);
     background:var(--surface);color:var(--ink-2);cursor:pointer;white-space:nowrap}
   .fchip:hover{border-color:#dcc9ce;background:var(--sunk)}
   .fchip.on{background:var(--crimson);border-color:var(--crimson);color:#fff;font-weight:700}
-  select.fsel{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:9px;font-size:.8rem;
-    font-family:var(--sans);background:var(--surface);color:var(--ink)}
+  select.fsel{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:9px;font-size:.79rem;
+    font-family:var(--sans);background:var(--surface);color:var(--ink);margin-bottom:7px}
+  .flabel{font-family:var(--mono);font-size:.5rem;letter-spacing:.11em;text-transform:uppercase;
+    color:var(--ink-4);margin:8px 0 4px}
+  .cnt{font-family:var(--mono);font-size:.6rem;color:var(--ink-3);margin:9px 0 7px}
   .clist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;
-    max-height:600px;overflow-y:auto;padding-right:3px}
-  .crow{--c:var(--ink-4);display:flex;gap:9px;align-items:flex-start;padding:9px 10px 9px 0;
-    border:1px solid var(--line);border-radius:11px;position:relative;overflow:hidden;background:var(--surface);
-    flex:0 0 auto}   /* the list is a scrolling flex column — without this, rows shrink and clip */
-  .crow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);opacity:.3}
+    max-height:52vh;overflow-y:auto;padding-right:3px}
+  .crow{--c:var(--ink-4);flex:0 0 auto;display:flex;gap:9px;align-items:flex-start;padding:9px 30px 9px 0;
+    border:1px solid var(--line);border-radius:10px;position:relative;background:var(--surface);cursor:pointer}
+  .crow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);opacity:.3;
+    border-radius:10px 0 0 10px}
   .crow.on::before{opacity:1}
-  .crow.on{border-color:#dccbd0;box-shadow:var(--shadow-s)}
-  .crow:hover{box-shadow:var(--shadow-m)}
-  .crow .tick{margin:2px 0 0 11px;flex:none;width:16px;height:16px;accent-color:var(--crimson);cursor:pointer}
-  .crow .body{flex:1;min-width:0}
-  .crow .code{font-family:var(--mono);font-size:.65rem;font-weight:700;letter-spacing:.04em;color:var(--crimson-d)}
-  .crow .ttl{font-size:.84rem;line-height:1.3;margin:2px 0 4px}
-  .mt{font-family:var(--mono);font-size:.635rem;line-height:1.6;color:var(--ink-2)}
-  .mt .home{color:var(--ink);font-weight:700}
-  .mt .arrow{color:var(--ink-4);padding:0 2px}
-  .crow .foot{font-family:var(--mono);font-size:.585rem;color:var(--ink-3);margin-top:4px}
-  .chip{display:inline-block;font-family:var(--mono);font-size:.53rem;letter-spacing:.06em;text-transform:uppercase;
-    padding:2px 6px;border-radius:5px;background:var(--sunk);color:var(--ink-3);margin-left:4px;vertical-align:1px;
-    border:1px solid var(--line-2)}
+  .crow.on{border-color:#dccbd0;background:#fdfbfc}
+  .crow:hover{box-shadow:var(--sh-m)}
+  .crow .add{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:20px;height:20px;
+    border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink-3);
+    font-size:.9rem;line-height:1;display:grid;place-items:center;pointer-events:none}
+  .crow.on .add{background:var(--ok);border-color:var(--ok);color:#fff}
+  .crow .body{flex:1;min-width:0;padding-left:11px}
+  .crow .code{font-family:var(--mono);font-size:.64rem;font-weight:700;color:var(--crimson-d)}
+  .crow .ttl{font-size:.83rem;line-height:1.3;margin:2px 0 4px}
+  .mt{font-family:var(--mono);font-size:.63rem;line-height:1.55;color:var(--ink-2)}
+  .mt b{color:var(--ink)} .mt s{text-decoration:none;color:var(--ink-4);padding:0 2px}
+  .crow .foot{font-family:var(--mono);font-size:.575rem;color:var(--ink-3);margin-top:4px}
+  .chip{display:inline-block;font-family:var(--mono);font-size:.52rem;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 5px;border-radius:5px;background:var(--sunk);color:var(--ink-3);margin-left:4px;
+    vertical-align:1px;border:1px solid var(--line-2)}
   .chip.sch{background:#eef1f6;color:#3c4a63;border-color:#dde3ee}
-  .chip.s1{background:#e8f1fb;color:#1c5cab;border-color:#cfe0f5}
-  .chip.s2{background:#fdeee6;color:#a8481f;border-color:#f7dccf}
-  .chip.online{background:#efeaf7;color:#5a48a0;border-color:#e0d8f0}
   .chip.letter{background:#e9f4ee;color:#166b45;border-color:#cfe6da}
   .chip.pf{background:#f3eef0;color:#7d6570;border-color:#e6dade}
+  .chip.s1{background:#e8f1fb;color:#1c5cab;border-color:#cfe0f5}
+  .chip.s2{background:#fdeee6;color:#a8481f;border-color:#f7dccf}
   .chip.lot{background:var(--warn-bg);color:var(--warn);border-color:#f0e2c4}
   .chip.clash{background:var(--bad-bg);color:var(--bad);border-color:#f2d3ce;font-weight:700}
-  .chip.nodate{background:#f0eef1;color:#6b6270;border-color:#e2dde6}
-  .empty{text-align:center;padding:24px 14px;color:var(--ink-3);font-size:.83rem;border:1px dashed var(--line);
-    border-radius:11px;background:var(--sunk)}
-  .cnt{font-family:var(--mono);font-size:.61rem;color:var(--ink-3);margin:8px 0 7px}
+  .empty{text-align:center;padding:22px 14px;color:var(--ink-3);font-size:.82rem;border:1px dashed var(--line);
+    border-radius:10px;background:var(--sunk)}
 
-  label.f{display:block;font-family:var(--mono);font-size:.56rem;letter-spacing:.11em;text-transform:uppercase;
-    color:var(--ink-3);margin:10px 0 4px}
-  input[type=text],input[type=number],input[type=time],select,textarea{width:100%;padding:8px 10px;
-    border:1px solid var(--line);border-radius:9px;font-family:var(--sans);font-size:.85rem;background:var(--surface);color:var(--ink)}
-  input[type=time],input[type=number]{font-family:var(--mono);font-size:.8rem}
-  textarea{font-family:var(--mono);font-size:.7rem;line-height:1.5}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--crimson);box-shadow:0 0 0 3px rgba(165,28,48,.13)}
-  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .btn{background:var(--crimson);color:#fff;border:none;border-radius:9px;padding:9px 15px;font-size:.82rem;
-    font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(165,28,48,.24)}
-  .btn:hover{background:var(--crimson-d)}
-  .btn.ghost{background:var(--surface);color:var(--ink-2);border:1px solid var(--line);box-shadow:none;font-weight:500}
-  .btn.ghost:hover{background:var(--sunk);color:var(--crimson-d)}
-  .btn.sm{padding:6px 11px;font-size:.75rem}
-  .btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-  .days{display:flex;gap:4px}
-  .days label{font-family:var(--mono);font-size:.64rem;border:1px solid var(--line);border-radius:8px;padding:5px 0;
-    cursor:pointer;background:var(--surface);color:var(--ink-2);flex:1;text-align:center}
-  .days input{position:absolute;opacity:0;pointer-events:none}
-  .days label:has(input:checked){background:var(--crimson);border-color:var(--crimson);color:#fff;font-weight:700}
-  .divider{height:1px;background:var(--line-2);margin:15px 0 2px}
-
-  .caltools{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding:13px 18px;border-bottom:1px solid var(--line);background:var(--sunk)}
-  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface);margin-top:4px}
-  .seg button{background:none;border:none;padding:7px 14px;font-family:var(--mono);font-size:.66rem;cursor:pointer;
-    color:var(--ink-2);border-right:1px solid var(--line)}
+  /* ───────── calendar ───────── */
+  .caltop{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:11px 15px;
+    border-bottom:1px solid var(--line);background:var(--sunk);border-radius:13px 13px 0 0}
+  .wknav{display:flex;align-items:center;gap:7px}
+  .wknav button{width:27px;height:27px;border-radius:7px;border:1px solid var(--line);background:var(--surface);
+    cursor:pointer;color:var(--ink-2);font-size:.85rem;line-height:1}
+  .wknav button:hover{background:var(--sunk);border-color:#dcc9ce}
+  .wknav .lbl{font-family:var(--mono);font-size:.72rem;font-weight:700;min-width:118px;text-align:center}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+  .seg button{background:none;border:none;padding:6px 11px;font-family:var(--mono);font-size:.62rem;
+    cursor:pointer;color:var(--ink-2);border-right:1px solid var(--line)}
   .seg button:last-child{border-right:none}
   .seg button.on{background:var(--crimson);color:#fff;font-weight:700}
-  .hoursel{display:flex;gap:6px;align-items:center;margin-top:4px}
-  .hoursel input{width:92px}
-  .hoursel span{color:var(--ink-4);font-family:var(--mono);font-size:.7rem}
-  .legend{margin-left:auto;display:flex;gap:13px;flex-wrap:wrap;align-items:center;font-family:var(--mono);
-    font-size:.62rem;color:var(--ink-2)}
-  .legend span{display:inline-flex;align-items:center;gap:6px}
-  .legend i{width:16px;height:11px;border-radius:3px;flex:none}
-  .cal{--gut:94px;--rowh:33px;position:relative;background:var(--surface);overflow-x:auto}
-  .calgrid{min-width:800px}
-  .chead{display:grid;grid-template-columns:var(--gut) repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line);
-    background:var(--surface);position:sticky;top:0;z-index:5}
+  .hint{margin-left:auto;font-family:var(--mono);font-size:.6rem;color:var(--ink-3);display:flex;
+    align-items:center;gap:6px}
+  .hint i{width:15px;height:10px;border-radius:3px;background:var(--work-soft);
+    border:1px dashed rgba(42,120,214,.5);flex:none}
+
+  .cal{--gut:88px;--rowh:34px;position:relative;overflow-x:auto;background:var(--surface);border-radius:0 0 13px 13px}
+  .calgrid{min-width:760px}
+  .chead{display:grid;grid-template-columns:var(--gut) repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line)}
   .chead .zh{display:grid;grid-template-columns:1fr 1fr;border-right:1px solid var(--line)}
-  .chead .zh b{font-family:var(--mono);font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 2px;text-align:center}
+  .chead .zh b{font-family:var(--mono);font-size:.5rem;letter-spacing:.09em;text-transform:uppercase;
+    padding:8px 2px;text-align:center}
   .chead .zh b:first-child{color:#8a5a20;background:#fdf7ee;border-right:1px solid var(--line-2)}
   .chead .zh b:last-child{color:#22597f;background:#eef5fa}
-  .chead .dh{padding:9px 6px;text-align:center;font-family:var(--mono);font-size:.64rem;letter-spacing:.09em;
+  .chead .dh{padding:7px 5px;text-align:center;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;
     text-transform:uppercase;color:var(--ink-2);border-right:1px solid var(--line-2);font-weight:700}
   .chead .dh:last-child{border-right:none}
   .chead .dh.we{color:var(--ink-4);background:var(--sunk)}
-  .chead .dh i{display:block;font-style:normal;font-size:.54rem;color:var(--ink-4);font-weight:400;margin-top:1px}
+  .chead .dh i{display:block;font-style:normal;font-size:.53rem;color:var(--ink-4);font-weight:400}
   .cbody{display:grid;grid-template-columns:var(--gut) repeat(7,minmax(0,1fr));position:relative}
   .gut{border-right:1px solid var(--line)}
-  .grow{display:grid;grid-template-columns:1fr 1fr;height:var(--rowh);font-family:var(--mono);font-size:.58rem}
+  .grow{display:grid;grid-template-columns:1fr 1fr;height:var(--rowh);font-family:var(--mono);font-size:.57rem}
   .grow s{text-decoration:none;padding:2px 3px 0;text-align:center;border-bottom:1px solid var(--line-2);display:block}
   .grow s.pt{color:#8a5a20;background:#fdf7ee;border-right:1px solid var(--line-2)}
   .grow s.et{color:#22597f;background:#eef5fa}
-  .grow.biz s.pt{background:#f9edda;font-weight:700}
-  .grow.biz s.et{background:#e2eef7;font-weight:700}
-  .dcol{border-right:1px solid var(--line-2);position:relative}
+  .dcol{border-right:1px solid var(--line-2);position:relative;touch-action:none}
   .dcol:last-child{border-right:none}
   .dcol.we{background:var(--sunk)}
-  .hr{height:var(--rowh);border-bottom:1px solid var(--line-2)}
-  .hr.alt{background:rgba(0,0,0,.011)}
-  .ev{position:absolute;left:2px;right:2px;border-radius:7px;padding:3px 5px 3px 8px;overflow:hidden;
-    background:var(--evbg);border:1px solid var(--evbd);box-shadow:0 1px 3px rgba(60,20,32,.1);z-index:2}
-  .ev::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c);border-radius:7px 0 0 7px}
-  .ev:hover{box-shadow:var(--shadow-m);z-index:4}
-  .ev b{display:block;font-family:var(--mono);font-size:.59rem;font-weight:700;color:var(--ink);white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-  .ev i{display:block;font-style:normal;font-family:var(--mono);font-size:.55rem;color:var(--ink-2);line-height:1.3}
-  .ev.clash{border-color:var(--bad);box-shadow:0 0 0 1.5px var(--bad),0 1px 3px rgba(60,20,32,.1)}
-  .ev.clash::after{content:"⚠";position:absolute;top:2px;right:4px;font-size:.64rem;color:var(--bad)}
-  .wk{position:absolute;left:2px;right:2px;border-radius:6px;z-index:1;
-    background:repeating-linear-gradient(135deg,rgba(42,120,214,.13) 0 5px,rgba(42,120,214,.055) 5px 10px);
-    border:1px dashed rgba(42,120,214,.42)}
-  .wk u{position:absolute;bottom:1px;left:6px;text-decoration:none;font-family:var(--mono);font-size:.53rem;color:#2761aa}
-  .tznote{padding:11px 18px 14px;font-size:.73rem;color:var(--ink-2);background:var(--sunk);border-top:1px solid var(--line);line-height:1.55}
-  .tznote b{color:var(--ink);font-family:var(--mono);font-size:.7rem}
+  .hr{height:var(--rowh);border-bottom:1px solid var(--line-2);pointer-events:none}
+  .hr.alt{background:rgba(0,0,0,.012)}
 
-  .verdicts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-  .verdicts li{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border-radius:11px;font-size:.85rem;
-    line-height:1.5;border:1px solid}
-  .verdicts li .ic{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-size:.7rem;
-    font-weight:700;color:#fff;margin-top:1px}
-  .verdicts li.bad{background:var(--bad-bg);border-color:#f0cdc8;color:#7d2419}
-  .verdicts li.bad .ic{background:var(--bad)}
-  .verdicts li.warn{background:var(--warn-bg);border-color:#eddfc0;color:#6d4c10}
-  .verdicts li.warn .ic{background:var(--warn)}
-  .verdicts li.ok{background:var(--ok-bg);border-color:#c8e4d5;color:#155c3c}
-  .verdicts li.ok .ic{background:var(--ok)}
-  .verdicts li b{font-family:var(--mono);font-size:.79rem;font-weight:700}
-  footer{margin-top:24px;text-align:center;font-size:.69rem;color:var(--ink-3);font-family:var(--mono);line-height:1.7}
+  .ev{position:absolute;left:2px;right:2px;border-radius:6px;padding:3px 5px 3px 7px;overflow:hidden;
+    background:var(--evbg);border:1px solid var(--evbd);z-index:3;pointer-events:auto}
+  .ev::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c);border-radius:6px 0 0 6px}
+  .ev b{display:block;font-family:var(--mono);font-size:.58rem;font-weight:700;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.22}
+  .ev i{display:block;font-style:normal;font-family:var(--mono);font-size:.54rem;color:var(--ink-2);line-height:1.28}
+  .ev.clash{border-color:var(--bad);box-shadow:0 0 0 1.5px var(--bad)}
+  .ev .x{position:absolute;top:1px;right:2px;width:14px;height:14px;border-radius:4px;border:none;
+    background:rgba(255,255,255,.8);color:var(--ink-3);font-size:.7rem;line-height:1;cursor:pointer;display:none}
+  .ev:hover .x{display:block} .ev .x:hover{background:var(--bad);color:#fff}
+
+  .wk{position:absolute;left:2px;right:2px;border-radius:6px;z-index:2;background:var(--work-soft);
+    border:1px dashed rgba(42,120,214,.55);cursor:grab;user-select:none}
+  .wk.drag{cursor:grabbing;box-shadow:var(--sh-m);z-index:6}
+  .wk .lab{position:absolute;left:6px;top:2px;font-family:var(--mono);font-size:.55rem;color:#245ea8;font-weight:600}
+  .wk .hnd{position:absolute;left:0;right:0;height:8px;cursor:ns-resize}
+  .wk .hnd.t{top:-2px} .wk .hnd.b{bottom:-2px}
+  .wk .hnd::after{content:"";position:absolute;left:50%;transform:translateX(-50%);top:3px;width:22px;height:2px;
+    border-radius:2px;background:rgba(42,120,214,.55)}
+  .wk .x{position:absolute;top:2px;right:3px;width:15px;height:15px;border-radius:4px;border:none;
+    background:rgba(255,255,255,.85);color:#245ea8;font-size:.72rem;line-height:1;cursor:pointer;display:none}
+  .wk:hover .x{display:block} .wk .x:hover{background:var(--bad);color:#fff}
+  .wk.ghost{opacity:.6;border-style:solid;pointer-events:none}
+
+  .calfoot{padding:10px 15px 13px;font-size:.73rem;color:var(--ink-2);background:var(--sunk);
+    border-top:1px solid var(--line);line-height:1.5}
+  .calfoot b{color:var(--ink);font-family:var(--mono);font-size:.7rem}
+
+  .verd{list-style:none;margin:11px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+  .verd li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;font-size:.83rem;
+    line-height:1.45;border:1px solid}
+  .verd li .ic{flex:none;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;
+    font-size:.66rem;font-weight:700;color:#fff;margin-top:1px}
+  .verd li.bad{background:var(--bad-bg);border-color:#f0cdc8;color:#7d2419} .verd li.bad .ic{background:var(--bad)}
+  .verd li.warn{background:var(--warn-bg);border-color:#eddfc0;color:#6d4c10} .verd li.warn .ic{background:var(--warn)}
+  .verd li.ok{background:var(--ok-bg);border-color:#c8e4d5;color:#155c3c} .verd li.ok .ic{background:var(--ok)}
+  .verd li b{font-family:var(--mono);font-size:.77rem}
+  .btn{background:var(--crimson);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:.78rem;
+    font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--crimson-d)}
+  .btn.ghost{background:var(--surface);color:var(--ink-2);border:1px solid var(--line);font-weight:500}
+  .btn.ghost:hover{background:var(--sunk);color:var(--crimson-d)}
+  .btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
   ::-webkit-scrollbar{height:9px;width:9px}
   ::-webkit-scrollbar-thumb{background:#d8c8cd;border-radius:5px}
   ::-webkit-scrollbar-track{background:var(--sunk)}
@@ -266,149 +233,73 @@
 </head>
 <body>
 
-<div class="mast">
-  <div class="wrap" style="padding-bottom:0">
-    <div class="eyebrow">Harvard Ed.M. · LDIT · part-time · Fall 2026 → Spring 2027</div>
-    <h1>Two-Coast Degree Planner <em>PT ⇄ ET</em></h1>
-    <p class="lede">Every course on offer across 12 Harvard schools and both terms — when it runs, what days, what hours
-      in <em>both</em> zones, and how it lands against a 42-credit degree and a 40-hour job.</p>
+<div class="bar">
+  <div class="bar-in">
+    <div class="brand">Two-Coast Planner <em>PT ⇄ ET</em></div>
+    <button class="barbtn" id="btn-degree">Degree</button>
+    <button class="barbtn" id="btn-term">Term map</button>
+    <button class="barbtn" id="btn-data">Save / load</button>
+    <div class="stats" id="stats"></div>
   </div>
 </div>
 
-<div class="wrap">
-  <div class="card" style="margin-bottom:15px;overflow:hidden">
-    <div class="card-b" style="padding:15px 19px 14px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap">
-        <div><div class="eyebrow">Degree progress</div>
-          <h2 style="font-size:1.05rem;margin-top:3px">The whole Ed.M., not just this term</h2></div>
-        <div class="tabs2" id="planScope">
-          <button data-s="all" class="on">Both terms</button>
-          <button data-s="2026 Fall">Fall 2026</button>
-          <button data-s="2027 Spring">Spring 2027</button>
-        </div>
-      </div>
-    </div>
-    <div class="reqs" id="reqs"></div>
+<div class="drawer" id="dw-degree"><div class="drawer-in">
+  <div class="eyebrow" style="margin-bottom:9px">Ed.M. requirements · both terms</div>
+  <div class="reqs" id="reqs"></div>
+</div></div>
+
+<div class="drawer" id="dw-term"><div class="drawer-in">
+  <div class="eyebrow" style="margin-bottom:3px">Term map</div>
+  <p style="margin:0 0 10px;font-size:.8rem;color:var(--ink-2)" id="ganttNote"></p>
+  <div class="gantt"><div class="gwrap" id="gantt"></div></div>
+</div></div>
+
+<div class="drawer" id="dw-data"><div class="drawer-in">
+  <div class="eyebrow" style="margin-bottom:7px">Your plan lives in this browser only</div>
+  <textarea id="io" rows="5" style="width:100%;font-family:var(--mono);font-size:.7rem;padding:9px;
+    border:1px solid var(--line);border-radius:9px"></textarea>
+  <div class="btnrow">
+    <button class="btn ghost" id="io-export">Export</button>
+    <button class="btn ghost" id="io-import">Import</button>
+    <button class="btn ghost" id="io-ics">Download .ics</button>
+    <button class="btn ghost" id="io-reset">Clear everything</button>
+  </div>
+  <p style="margin-top:10px;font-size:.76rem;color:var(--ink-2)" id="dataNote"></p>
+</div></div>
+
+<div class="main">
+  <div class="card pad" style="position:sticky;top:56px">
+    <div class="step" id="step1"><span class="n">1</span><span><b>Drag on the calendar</b> to block out your work hours. Drag the edges to stretch, the middle to move.</span></div>
+    <div class="step" id="step2"><span class="n">2</span><span><b>Search below</b> and click a course to drop it on the calendar.</span></div>
+
+    <div class="srch"><input type="text" id="q" placeholder="Search course, code or professor…"></div>
+    <div class="flabel">Term</div><div class="filt" id="f-term"></div>
+    <div class="flabel">School</div><select class="fsel" id="f-sch"></select>
+    <div class="flabel">Grading</div><div class="filt" id="f-grade"></div>
+    <div class="flabel">Fits my week</div><div class="filt" id="f-fit"></div>
+    <div class="cnt" id="catCount"></div>
+    <ul class="clist" id="catList"></ul>
   </div>
 
-  <div class="card">
-    <div class="card-h">
-      <div class="eyebrow">Term map</div>
-      <h2 style="font-size:1.05rem;margin-top:3px">What runs when</h2>
-      <p class="sub" id="ganttNote">Each selected course drawn across its real start and end dates.</p>
+  <div>
+    <div class="card">
+      <div class="caltop">
+        <div class="wknav">
+          <button id="wk-prev" title="Previous week">‹</button>
+          <span class="lbl" id="wkLabel">—</span>
+          <button id="wk-next" title="Next week">›</button>
+        </div>
+        <div class="seg" id="tzseg">
+          <button data-tz="America/Los_Angeles" class="on">Pacific</button>
+          <button data-tz="America/New_York">Eastern</button>
+        </div>
+        <div class="hint"><i></i> drag empty space to add work hours</div>
+      </div>
+      <div class="cal"><div class="calgrid" id="cal"></div></div>
+      <div class="calfoot" id="calfoot"></div>
     </div>
-    <div class="card-b" style="padding-top:6px">
-      <div class="gantt"><div class="gwrap" id="gantt"></div></div>
-      <div class="tlwrap"><div class="tl" id="tl"></div></div>
-    </div>
+    <ul class="verd" id="warns"></ul>
   </div>
-
-  <div class="cols">
-    <div class="rail">
-      <div class="card">
-        <div class="tabs" id="tabs">
-          <button data-p="p-cat" class="on">Catalog</button>
-          <button data-p="p-plan">My plan<span class="n" id="planN">0</span></button>
-          <button data-p="p-job">Job</button>
-          <button data-p="p-data">Data</button>
-        </div>
-
-        <div class="pane on" id="p-cat">
-          <div class="card-b">
-            <div class="srch"><input type="text" id="q" placeholder="Search by code, title or instructor…"></div>
-            <div class="fgroup"><div class="glab2">Term</div><div class="fchips" id="f-term"></div></div>
-            <div class="fgroup"><div class="glab2">School</div><select class="fsel" id="f-sch"></select></div>
-            <div class="fgroup"><div class="glab2">Grading</div><div class="fchips" id="f-grade"></div></div>
-            <div class="fgroup"><div class="glab2">Fits my week</div><div class="fchips" id="f-fit"></div></div>
-            <div class="fgroup"><div class="glab2">Only show</div><div class="fchips" id="f-only"></div></div>
-            <div class="cnt" id="catCount"></div>
-            <ul class="clist" id="catList"></ul>
-          </div>
-        </div>
-
-        <div class="pane" id="p-plan">
-          <div class="card-b">
-            <p class="sub" style="margin:0 0 11px">Your selected courses across both terms. Times read
-              <b>Eastern first</b>, then converted.</p>
-            <ul class="clist" id="planList" style="max-height:none"></ul>
-          </div>
-        </div>
-
-        <div class="pane" id="p-job">
-          <div class="card-b">
-            <p class="sub" style="margin:0">You work both coasts — give the planner the widest envelope it may
-              place work inside, plus a weekly target. It fills the gaps around your classes.</p>
-            <div class="g2">
-              <div><label class="f">Weekly target (h)</label><input type="number" id="s-target" value="40" min="0" max="80"></div>
-              <div><label class="f">Envelope zone</label><select id="s-wtz">
-                <option value="America/Los_Angeles">Pacific</option><option value="America/New_York">Eastern</option></select></div>
-            </div>
-            <div class="g2">
-              <div><label class="f">Earliest start</label><input type="time" id="s-wstart" value="06:00"></div>
-              <div><label class="f">Latest end</label><input type="time" id="s-wend" value="20:00"></div>
-            </div>
-            <label class="f">Days available for work</label><div class="days" id="s-wdays"></div>
-            <div class="g2" style="margin-top:10px">
-              <div><label class="f">Buffer round class</label><input type="number" id="s-buf" value="15" min="0" max="60" step="5"></div>
-              <div><label class="f">Min work block</label><input type="number" id="s-min" value="60" min="15" max="240" step="15"></div>
-            </div>
-            <div class="divider"></div>
-            <label class="f">Study hours per credit / week (13-week basis)</label>
-            <input type="number" id="s-study" value="2.5" min="0" max="6" step="0.5">
-            <label class="f">Per-term credit cap</label>
-            <input type="number" id="s-cap" value="10" min="2" max="24" step="1">
-            <p class="sub" style="margin-top:6px">Part-time Ed.M. is capped at <b>10 credits per term</b>.
-              Short-session courses deliver their credits in fewer weeks, so the planner scales their weekly
-              study load up (capped at 4×).</p>
-          </div>
-        </div>
-
-        <div class="pane" id="p-data">
-          <div class="card-b">
-            <p class="sub" style="margin:0 0 10px">Your plan lives in this browser. Export it, or paste one back in.</p>
-            <textarea id="io" rows="7" placeholder='{ "selected": [ … ] }'></textarea>
-            <div class="btnrow">
-              <button class="btn sm ghost" id="io-export">Export plan</button>
-              <button class="btn sm ghost" id="io-import">Import plan</button>
-              <button class="btn sm ghost" id="io-ics">Download .ics</button>
-              <button class="btn sm ghost" id="io-reset">Clear plan</button>
-            </div>
-            <p class="sub" id="icsNote" style="margin-top:9px"></p>
-            <div class="divider"></div>
-            <p class="sub" id="dataNote"></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <div class="card" style="overflow:hidden">
-        <div class="caltools">
-          <div><div class="eyebrow">Grid laid out in</div>
-            <div class="seg" id="tzseg">
-              <button data-tz="America/Los_Angeles" class="on">Pacific</button>
-              <button data-tz="America/New_York">Eastern</button></div></div>
-          <div><div class="eyebrow">Hours shown</div>
-            <div class="hoursel"><input type="time" id="g-from" value="05:00" step="3600"><span>→</span><input type="time" id="g-to" value="23:00" step="3600"></div></div>
-          <div class="legend">
-            <span><i style="background:linear-gradient(90deg,var(--crimson) 0 3px,#f7e9eb 3px)"></i>class</span>
-            <span><i style="background:repeating-linear-gradient(135deg,rgba(42,120,214,.3) 0 4px,rgba(42,120,214,.1) 4px 8px);border:1px dashed rgba(42,120,214,.5)"></i>work</span>
-            <span><i style="background:#fff;box-shadow:0 0 0 1.5px var(--bad)"></i>collision</span>
-          </div>
-        </div>
-        <div class="cal"><div class="calgrid" id="cal"></div></div>
-        <div class="tznote" id="tznote"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-h"><div class="eyebrow">Verdict</div>
-          <h2 style="font-size:1.05rem;margin-top:3px">Does it actually fit?</h2></div>
-        <div class="card-b"><ul class="verdicts" id="warns"></ul></div>
-      </div>
-    </div>
-  </div>
-
-  <footer id="foot"></footer>
 </div>
 
 <script>
@@ -625,452 +516,440 @@ function totals(){
   };
 }
 
-/* ═══ render: requirements ═══ */
+
+
+/* ═══════════ work blocks — authored, not inferred ═══════════
+   The old model auto-poured 40h into gaps with an algorithm you couldn't see.
+   These are blocks you draw yourself. Stored as {day, s, e} minutes in the
+   WORK ZONE so switching the grid between PT and ET moves them correctly. ═══ */
+const SNAP=15;
+function workZone(){ return state.settings.wtz; }
+function workBlocksUTC(w){
+  return (state.work||[]).map(b=>{
+    const d=new Date(w+(b.day-1)*DAY_MS);
+    return {b, start:zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(b.s/60),b.s%60,workZone()),
+               end:zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(b.e/60),b.e%60,workZone())};
+  });
+}
+const workHours=()=>(state.work||[]).reduce((t,b)=>t+(b.e-b.s)/60,0);
+// convert a point drawn in the DISPLAY zone back into work-zone minutes
+function displayToWork(w,dow,min){
+  const d=new Date(w+(dow-1)*DAY_MS);
+  const ts=zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(min/60),min%60,state.settings.displayTz);
+  const z=utcToZoned(ts,workZone());
+  return {day:z.dow,min:z.min};
+}
+function workToDisplay(w,b){
+  const d=new Date(w+(b.day-1)*DAY_MS);
+  const s=zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(b.s/60),b.s%60,workZone());
+  const e=zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(b.e/60),b.e%60,workZone());
+  const zs=utcToZoned(s,state.settings.displayTz), ze=utcToZoned(e,state.settings.displayTz);
+  return {dow:zs.dow, a:zs.min, b:(ze.dow!==zs.dow?1440:ze.min)};
+}
+
+/* ═══════════ status bar ═══════════ */
+function renderStats(L,clashN){
+  const T=totals(), wh=workHours();
+  const st=[
+    {k:'credits', v:T.crAll, s:'of 42'},
+    {k:'letter', v:T.letter, s:'of 16', alert:T.crAll>0&&T.letter<16},
+    {k:'work / wk', v:wh.toFixed(wh%1?1:0)+'h', s:'you drew', alert:wh>0&&wh<state.settings.target},
+    {k:'conflicts', v:clashN, s:clashN===1?'clash':'clashes', alert:clashN>0}
+  ];
+  document.getElementById('stats').innerHTML=st.map(x=>
+    `<div class="stat${x.alert?' alert':''}"><b class="num">${x.v}</b><span>${x.k} ${x.s}</span></div>`).join('');
+  document.getElementById('step1').classList.toggle('done', wh>0);
+  document.getElementById('step2').classList.toggle('done', state.selected.length>0);
+}
+
+/* ═══════════ requirements drawer ═══════════ */
 function renderReqs(){
   const T=totals();
-  const bar=(k,v,goal,fmt,note,inv)=>{
+  const bar=(k,v,goal,note,inv)=>{
     const pct=Math.min(100,goal?v/goal*100:0);
-    let cls = inv ? (v>goal?'bad':(v>goal*0.85?'warn':'ok'))
-                  : (v>=goal?'ok':(v>=goal*0.5?'warn':'bad'));
-    if(v===0&&!inv) cls='';
-    return `<div class="req ${cls}"><div class="k">${k}</div>
-      <div class="v num">${fmt||v}<small> / ${goal}</small></div>
-      <div class="track"><div class="fill" style="width:${pct}%"></div></div>
-      <div class="s">${note}</div></div>`;
+    let cls=inv?(v>goal?'bad':'ok'):(v>=goal?'ok':(v>=goal*0.5?'warn':''));
+    return `<div class="req ${cls}"><div class="k">${k}</div><div class="v num">${v}<small> / ${goal}</small></div>
+      <div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="s">${note}</div></div>`;
   };
-  const found=T.foundations.length, pceOK=T.pce.length>0;
-  const overCap=Object.entries(T.perTerm).filter(([,v])=>v>state.settings.termCap);
-  document.getElementById('reqs').innerHTML =
-    bar('Total credits',T.crAll,RULES.totalMin,T.crAll,`${RULES.totalMin} min · ${RULES.totalMax} max`)
-  + bar('Letter-eligible',T.letter,RULES.letterMin,T.letter,'16 min — must be elected')
-  + `<div class="req ${pceOK?'ok':''}"><div class="k">Program Core (PCE)</div>
-      <div class="v">${pceOK?esc(T.pce[0].code):'—'}</div>
-      <div class="track"><div class="fill" style="width:${pceOK?100:0}%"></div></div>
-      <div class="s">${pceOK?(letterCapable(T.pce[0])?'letter-eligible':'SAT/UNSAT — 0 letter credits'):'T522 · T550 · T543'}</div></div>`
-  + `<div class="req ${found>=3?'ok':(found?'warn':'')}"><div class="k">Foundations</div>
-      <div class="v num">${found}<small> / 3</small></div>
-      <div class="track"><div class="fill" style="width:${Math.min(100,found/3*100)}%"></div></div>
-      <div class="s">${T.foundations.map(c=>esc(c.code)).join(' · ')||'HPL + 2 of 3'}</div></div>`
-  + bar('Cross-registration',T.xreg,RULES.xregMax,T.xreg,'16 credit ceiling',true)
-  + `<div class="req ${overCap.length?'bad':''}"><div class="k">Per-term load</div>
-      <div class="v num">${Object.values(T.perTerm).length?Math.max(...Object.values(T.perTerm)):0}<small> / ${state.settings.termCap}</small></div>
-      <div class="track"><div class="fill" style="width:${Math.min(100,(Object.values(T.perTerm).length?Math.max(...Object.values(T.perTerm)):0)/state.settings.termCap*100)}%"></div></div>
-      <div class="s">${overCap.length?overCap.map(([t,v])=>t+': '+v+'cr').join(' · '):'part-time cap'}</div></div>`;
+  const pceOK=T.pce.length>0, found=T.foundations.length;
+  const maxTerm=Object.values(T.perTerm).length?Math.max(...Object.values(T.perTerm)):0;
+  document.getElementById('reqs').innerHTML=
+    bar('Total credits',T.crAll,42,'42 min · 56 max')
+  + bar('Letter-eligible',T.letter,16,'must be elected by add/drop')
+  + `<div class="req ${pceOK?'ok':''}"><div class="k">Program Core</div><div class="v">${pceOK?T.pce[0].code:'—'}</div>
+     <div class="track"><div class="fill" style="width:${pceOK?100:0}%"></div></div>
+     <div class="s">${pceOK?(letterCapable(T.pce[0])?'letter-eligible':'SAT/UNSAT — 0 letter credits'):'T522 · T550 · T543'}</div></div>`
+  + `<div class="req ${found>=3?'ok':(found?'warn':'')}"><div class="k">Foundations</div><div class="v num">${found}<small> / 3</small></div>
+     <div class="track"><div class="fill" style="width:${Math.min(100,found/3*100)}%"></div></div>
+     <div class="s">${T.foundations.map(c=>c.code).join(' · ')||'HPL + 2 of 3'}</div></div>`
+  + bar('Cross-registration',T.xreg,16,'16 credit ceiling',true)
+  + bar('Heaviest term',maxTerm,state.settings.termCap,'part-time cap',true);
 }
 
-/* ═══ render: term map ═══ */
+/* ═══════════ term map drawer ═══════════ */
 function renderGantt(){
-  const S=sel().filter(c=>c.term===state.term);
-  const b=termWindow(state.term);
+  const S=sel().filter(c=>c.term===state.term), b=termWindow(state.term);
   const el=document.getElementById('gantt');
-  if(!S.length||!b){
-    el.innerHTML=`<div class="gempty">No courses selected for ${esc(state.term)}. Add some from the Catalog.</div>`;
-    document.getElementById('ganttNote').textContent=
-      'Each selected course is drawn across its real start and end dates.';
-    return;
-  }
-  const A=b.a,Z=b.z,span=Z-A;
-  el.style.setProperty('--glab','118px');
-  const months=[];
-  let m=new Date(A); m=Date.UTC(m.getUTCFullYear(),m.getUTCMonth(),1);
+  if(!S.length||!b){ el.innerHTML='<div class="empty">Nothing selected for '+state.term+' yet.</div>';
+    document.getElementById('ganttNote').textContent='Each course you add is drawn across its real start and end dates.';return; }
+  const A=b.a,Z=b.z,span=Z-A,months=[];
+  let m=Date.UTC(new Date(A).getUTCFullYear(),new Date(A).getUTCMonth(),1);
   while(m<=Z){ months.push(m); const d=new Date(m); m=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1); }
-  let h=`<div class="gaxis">`+months.map(mm=>{
-    const s=Math.max(mm,A),e=Math.min(Z,(()=>{const d=new Date(mm);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1);})());
-    return `<div class="gmon" style="flex:${Math.max(0.001,(e-s)/span)}">${new Date(mm).toLocaleDateString('en-US',{timeZone:'UTC',month:'short'})}</div>`;
-  }).join('')+`</div>`;
-  const undated=[];
+  let h='<div class="gaxis">'+months.map(mm=>{
+    const s=Math.max(mm,A), d=new Date(mm);
+    const e=Math.min(Z,Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1));
+    return `<div class="gmon" style="flex:${Math.max(.001,(e-s)/span)}">${d.toLocaleDateString('en-US',{timeZone:'UTC',month:'short'})}</div>`;
+  }).join('')+'</div>';
   for(const c of S){
     const col=colorFor(c.i);
-    if(!c.d0){ undated.push(c);
-      h+=`<div class="grow2"><div class="glab" title="${esc(c.code)}">${esc(c.code)} <s>${esc(c.sch)}</s></div>
-        <div class="gtrack"><div class="gbar undated" style="left:0;width:100%" title="No dates published">
-        <span>dates not published</span></div></div></div>`;
-      continue; }
+    if(!c.d0){ h+=`<div class="grow2"><div class="glab">${c.code} <s>${c.sch}</s></div><div class="gtrack">
+      <div class="gbar undated" style="left:0;width:100%"><span>dates not published</span></div></div></div>`; continue; }
     const s=parseISO(c.d0),e=parseISO(c.d1||c.d0);
-    const L=Math.max(0,(s-A)/span*100), W=Math.max(1.2,(Math.min(e,Z)-Math.max(s,A))/span*100);
-    const dayStr=c.days.length?c.days.map(d=>DL[d-1]).join(''):'—';
-    const timeStr=c.start?`${fmt12(toMin(c.start))}–${fmt12(toMin(c.end))} ET`:'no time';
-    h+=`<div class="grow2"><div class="glab" title="${esc(c.title)}">${esc(c.code)} <s>${esc(c.sch)}</s></div>
-      <div class="gtrack"><div class="gbar" style="--c:${col};left:${L}%;width:${W}%"
-        title="${esc(c.code)} — ${esc(c.title)}\n${shortDate(s)} – ${shortDate(e)}\n${dayStr} ${timeStr}\n${c.cr}cr · ${esc(c.sess||'—')}">
-        <span>${shortDate(s)} – ${shortDate(e)} · ${dayStr}</span></div></div></div>`;
+    const L=Math.max(0,(s-A)/span*100), W=Math.max(1.5,(Math.min(e,Z)-Math.max(s,A))/span*100);
+    const days=c.days.map(d=>DL[d-1]).join('');
+    h+=`<div class="grow2"><div class="glab" title="${esc(c.title)}">${c.code} <s>${c.sch}</s></div>
+      <div class="gtrack"><div class="gbar" style="--c:${col};left:${L}%;width:${W}%">
+      <span>${shortDate(s)} – ${shortDate(e)} · ${days}</span></div></div></div>`;
   }
   el.innerHTML=h;
-  const dated=S.filter(c=>c.d0);
-  document.getElementById('ganttNote').innerHTML =
-    `${dated.length} of ${S.length} selected course${S.length===1?'':'s'} have published dates`
-    + (undated.length?` — <b>${undated.length}</b> shown hatched because my.harvard hasn't posted a date range.`:'.')
-    + ` Term spans <b>${shortDate(A)} – ${shortDate(Z)}</b>.`;
+  document.getElementById('ganttNote').innerHTML=
+    `${S.filter(c=>c.d0).length} of ${S.length} have published dates · term spans <b>${shortDate(A)} – ${shortDate(Z)}</b>`;
 }
 
-function renderTL(){
-  const W=termWeeks(state.term);
-  const host=document.getElementById('tl');
-  if(!W.length){ host.innerHTML=''; host.style.display='none'; return; }
-  host.style.display='flex';
-  const loads=W.map(w=>({w,t:weekLoad(w).totalH}));
-  const max=Math.max(RULES.sustainable*1.15,...loads.map(l=>l.t),1);
-  const fw=focusWeek(),TL=112,VAL=13,LAB=17,PLOT=TL-VAL-LAB;
-  document.getElementById('tl').innerHTML=loads.map(({w,t})=>
-    `<div class="tlw${w===fw?' on':''}${t>RULES.sustainable?' over':''}" data-w="${w}"
-      title="Week of ${shortDate(w)} — ${t.toFixed(1)}h committed">
-      <span class="val num">${t>0.5?Math.round(t):''}</span>
-      <div class="barwrap"><div class="bar" style="height:${Math.max(1,t/max*100)}%"></div></div>
-      <span class="lab">${shortDate(w)}</span></div>`).join('')
-    +`<div class="tl-ceil" style="bottom:${LAB+RULES.sustainable/max*PLOT}px"><span>${RULES.sustainable}h ceiling</span></div>`;
-  document.querySelectorAll('#tl .tlw').forEach(el=>el.onclick=()=>{state.week=+el.dataset.w;save();renderAll();});
-}
-
-/* ═══ render: course rows ═══ */
+/* ═══════════ course list ═══════════ */
 function gradeChip(c){
-  if(letterAuto(c)) return '<span class="chip letter">letter</span>';
-  if(letterCapable(c)) return '<span class="chip letter">letter opt.</span>';
-  return '<span class="chip pf">pass/fail</span>';
+  if(!/Letter/i.test(c.grade||'')) return '<span class="chip pf">pass/fail</span>';
+  return /Option/i.test(c.grade||'')?'<span class="chip letter">letter opt.</span>':'<span class="chip letter">letter</span>';
 }
-function courseRow(c,opts){
+function courseRow(c,clash){
   const on=state.selected.includes(c.i);
   const col=on?colorFor(c.i):'var(--ink-4)';
-  const dispAb=abbrFor(state.settings.displayTz);
-  let when;
-  if(!c.days.length||!c.start) when='<span style="color:var(--ink-3)">no meeting pattern published</span>';
-  else{
+  let when='<span style="color:var(--ink-3)">no meeting time published</span>';
+  if(c.days.length&&c.start){
     const sM=toMin(c.start),eM=toMin(c.end);
-    const ref=c.d0?parseISO(c.d0):Date.now();  // DST reference only
-    const dd=new Date(ref);
-    const sU=zonedToUtc(dd.getUTCFullYear(),dd.getUTCMonth()+1,dd.getUTCDate(),Math.floor(sM/60),sM%60,'America/New_York');
-    const eU=zonedToUtc(dd.getUTCFullYear(),dd.getUTCMonth()+1,dd.getUTCDate(),Math.floor(eM/60),eM%60,'America/New_York');
-    const zs=utcToZoned(sU,state.settings.displayTz),ze=utcToZoned(eU,state.settings.displayTz);
-    const dayStr=c.days.map(d=>DL[d-1]).join('');
-    const home=`<span class="home">${dayStr} ${fmt12(sM)}–${fmt12(eM)} ET</span>`;
+    const ref=c.d0?parseISO(c.d0):Date.now(), d=new Date(ref);
+    const sU=zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(sM/60),sM%60,'America/New_York');
+    const eU=zonedToUtc(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),Math.floor(eM/60),eM%60,'America/New_York');
+    const zs=utcToZoned(sU,state.settings.displayTz), ze=utcToZoned(eU,state.settings.displayTz);
     const conv=state.settings.displayTz==='America/New_York'?''
-      :`<span class="arrow">→</span>${fmt12(zs.min)}–${fmt12(ze.min)} ${dispAb}`;
-    when=home+conv;
+      :`<s>→</s>${fmt12(zs.min)}–${fmt12(ze.min)} ${abbrFor(state.settings.displayTz)}`;
+    when=`<b>${c.days.map(d=>DL[d-1]).join('')} ${fmt12(sM)}–${fmt12(eM)} ET</b>${conv}`;
   }
   const dates=c.d0?`${shortDate(parseISO(c.d0))} – ${shortDate(parseISO(c.d1||c.d0))}`:'dates TBA';
-  const comp=compression(c);
-  return `<li class="crow ${on?'on':''}" style="--c:${col}">
-    <input type="checkbox" class="tick" ${on?'checked':''} data-i="${c.i}" aria-label="Select ${esc(c.code)}">
-    <div class="body">
-      <span class="code">${esc(c.code)}${c.sec&&c.sec!=='1'?' §'+esc(c.sec):''}</span>
-      <span class="chip sch">${esc(c.sch)}</span>${gradeChip(c)}
-      ${c.sess==='Fall 1'?'<span class="chip s1">Fall 1</span>':''}
-      ${c.sess==='Fall 2'?'<span class="chip s2">Fall 2</span>':''}
-      ${c.mode==='Online'?'<span class="chip online">online</span>':''}
-      ${c.lottery?'<span class="chip lot">lottery</span>':''}
-      ${!c.d0?'<span class="chip nodate">no dates</span>':''}
-      ${opts&&opts.clash?'<span class="chip clash">collision</span>':''}
-      <div class="ttl">${esc(c.title)}</div>
-      <div class="mt">${when}</div>
-      <div class="foot">${c.cr||'?'}cr · ${dates}${comp>1.4?' · '+comp.toFixed(1)+'× pace':''}${c.inst?' · '+esc(c.inst.split(';')[0]):''}</div>
-    </div></li>`;
-}
-function wireTicks(id){
-  document.querySelectorAll('#'+id+' .tick').forEach(cb=>cb.onchange=e=>{
-    const i=+e.target.dataset.i;
-    if(e.target.checked){if(!state.selected.includes(i))state.selected.push(i);}
-    else state.selected=state.selected.filter(x=>x!==i);
-    state.week=null;save();renderAll();
-  });
+  return `<li class="crow ${on?'on':''}" style="--c:${col}" data-i="${c.i}">
+    <div class="body"><span class="code">${c.code}</span><span class="chip sch">${c.sch}</span>${gradeChip(c)}
+      ${c.sess==='Fall 1'?'<span class="chip s1">Fall 1</span>':''}${c.sess==='Fall 2'?'<span class="chip s2">Fall 2</span>':''}
+      ${c.lottery?'<span class="chip lot">lottery</span>':''}${clash?'<span class="chip clash">clash</span>':''}
+      <div class="ttl">${esc(c.title)}</div><div class="mt">${when}</div>
+      <div class="foot">${c.cr||'?'}cr · ${dates}${c.inst?' · '+esc(c.inst.split(';')[0]):''}</div></div>
+    <span class="add">${on?'✓':'+'}</span></li>`;
 }
 function passes(c){
   const f=state.filters,q=(state.q||'').trim().toLowerCase();
+  if(!(c.days.length&&c.start)) return false;               // calendar tool: must be placeable
   if(q&&!((c.code+' '+c.title+' '+(c.inst||'')).toLowerCase().includes(q)))return false;
   if(f.term&&c.term!==f.term)return false;
   if(f.sch&&c.sch!==f.sch)return false;
-  if(f.grade==='letter'&&!letterCapable(c))return false;
-  if(f.grade==='pf'&&letterCapable(c))return false;
-  if(f.only==='sched'&&!(c.days.length&&c.start))return false;
-  if(f.only==='dated'&&!c.d0)return false;
-  if(f.only==='xreg'&&!/^Available/.test(c.xreg||''))return false;
-  if(f.only==='nolot'&&c.lottery)return false;
-  if(f.fit){
-    if(!c.start)return false;
-    if(f.fit==='beforePT'&&toMin(c.end)>12*60)return false;
-    if(f.fit==='afterPT'&&toMin(c.start)<17*60)return false;
-  }
+  if(f.grade==='letter'&&!/Letter/i.test(c.grade||''))return false;
+  if(f.grade==='pf'&&/Letter/i.test(c.grade||''))return false;
+  if(f.fit==='beforePT'&&toMin(c.end)>12*60)return false;
+  if(f.fit==='afterPT'&&toMin(c.start)<17*60)return false;
   return true;
 }
-function renderCatalog(){
+function renderList(clashSet){
   const hits=CATALOG.filter(passes);
   document.getElementById('catCount').textContent=
-    `${hits.length.toLocaleString()} of ${CATALOG.length.toLocaleString()} sections`+(hits.length>60?' · showing first 60':'');
+    `${hits.length.toLocaleString()} courses`+(hits.length>50?' · showing first 50':'');
   document.getElementById('catList').innerHTML=
-    hits.length?hits.slice(0,60).map(c=>courseRow(c)).join(''):'<li class="empty">Nothing matches those filters.</li>';
-  wireTicks('catList');
-}
-function renderPlan(clashCodes){
-  document.getElementById('planN').textContent=state.selected.length;
-  const S=sel();
-  document.getElementById('planList').innerHTML=
-    S.length?S.map(c=>courseRow(c,{clash:clashCodes.has(c.i)})).join('')
-            :'<li class="empty">Nothing selected yet.<br>Add courses from the Catalog tab.</li>';
-  wireTicks('planList');
+    hits.length?hits.slice(0,50).map(c=>courseRow(c,clashSet.has(c.i))).join(''):'<li class="empty">Nothing matches.</li>';
+  document.querySelectorAll('#catList .crow').forEach(r=>r.onclick=()=>{
+    const i=+r.dataset.i;
+    if(state.selected.includes(i)) state.selected=state.selected.filter(x=>x!==i);
+    else { state.selected.push(i); const c=CATALOG[i];
+      if(c.term!==state.term){state.term=c.term;state.week=null;}
+      if(c.d0){ const wk=mondayOf(parseISO(c.d0)); if(termWeeks(state.term).includes(wk)) state.week=wk; } }
+    save(); renderAll();
+  });
 }
 
-/* ═══ render: calendar ═══ */
-function renderGrid(list,clash,work,w){
-  const S=state.settings,from=toMin(S.gridFrom),to=toMin(S.gridTo);
-  const span=Math.max(60,to-from),rows=Math.ceil(span/60),rowh=33,d0=new Date(w);
+/* ═══════════ calendar ═══════════ */
+let GRID=null;
+function renderGrid(){
+  const S=state.settings, w=focusWeek();
+  const from=toMin('05:00'), to=toMin('23:00');
+  const rows=Math.ceil((to-from)/60), rowh=34, d0=new Date(w);
   let h='<div class="chead"><div class="zh"><b>Pacific</b><b>Eastern</b></div>';
   for(let i=0;i<7;i++)h+=`<div class="dh${i>=5?' we':''}">${DAYS[i]}<i>${shortDate(w+i*DAY_MS)}</i></div>`;
   h+='</div><div class="cbody"><div class="gut">';
   for(let i=0;i<rows;i++){
     const m=from+i*60;
     const ts=zonedToUtc(d0.getUTCFullYear(),d0.getUTCMonth()+1,d0.getUTCDate(),Math.floor(m/60),m%60,S.displayTz);
-    const pt=utcToZoned(ts,'America/Los_Angeles'),et=utcToZoned(ts,'America/New_York');
-    const biz=pt.min>=540&&pt.min<1020;
-    h+=`<div class="grow${biz?' biz':''}"><s class="pt">${fmt12(pt.min)}</s><s class="et">${fmt12(et.min)}</s></div>`;
+    const pt=utcToZoned(ts,'America/Los_Angeles'), et=utcToZoned(ts,'America/New_York');
+    h+=`<div class="grow"><s class="pt">${fmt12(pt.min)}</s><s class="et">${fmt12(et.min)}</s></div>`;
   }
   h+='</div>';
-  for(let d=1;d<=7;d++){h+=`<div class="dcol${d>=6?' we':''}">`;
+  for(let d=1;d<=7;d++){h+=`<div class="dcol${d>=6?' we':''}" data-d="${d}">`;
     for(let i=0;i<rows;i++)h+=`<div class="hr${i%2?' alt':''}"></div>`;h+='</div>';}
   h+='</div>';
   document.getElementById('cal').innerHTML=h;
-  const cols=document.querySelectorAll('#cal .dcol');
+  GRID={from,to,rowh,w,cols:document.querySelectorAll('#cal .dcol')};
+
   const place=(el,dow,a0,b0,lane=0,lanes=1)=>{
-    const col=cols[dow-1];if(!col)return;
-    const a=Math.max(a0,from),b=Math.min(b0,to);if(b<=a)return;
+    const col=GRID.cols[dow-1]; if(!col) return null;
+    const a=Math.max(a0,from), b=Math.min(b0,to); if(b<=a) return null;
     el.style.top=((a-from)/60*rowh)+'px';
-    el.style.height=Math.max(15,(b-a)/60*rowh-2)+'px';
-    if(lanes>1){const wd=100/lanes;el.style.left=`calc(${lane*wd}% + 2px)`;
-      el.style.width=`calc(${wd}% - 4px)`;el.style.right='auto';}
-    col.appendChild(el);
+    el.style.height=Math.max(14,(b-a)/60*rowh-2)+'px';
+    if(lanes>1){const wd=100/lanes;el.style.left=`calc(${lane*wd}% + 2px)`;el.style.width=`calc(${wd}% - 4px)`;el.style.right='auto';}
+    col.appendChild(el); return el;
   };
-  for(const[ws,we]of work.blocks){
-    const zs=utcToZoned(ws,S.displayTz),ze=utcToZoned(we,S.displayTz),hrs=(we-ws)/3600000;
-    const el=document.createElement('div');el.className='wk';
-    el.innerHTML=hrs>=1.2?`<u>work · ${hrs.toFixed(hrs%1?1:0)}h</u>`:'';
-    el.title=`Work · ${fmt12(zs.min)}–${fmt12(ze.min)} ${abbrFor(S.displayTz)} · ${hrs.toFixed(1)}h`;
-    place(el,zs.dow,zs.min,ze.dow!==zs.dow?1440:ze.min);
-  }
-  const evs=list.map((it,i)=>{
-    const zs=utcToZoned(it.start,S.displayTz),ze=utcToZoned(it.end,S.displayTz);
-    return {it,i,dow:zs.dow,a:zs.min,b:ze.dow!==zs.dow?1440:ze.min,lane:0,lanes:1};
+
+  // work blocks (drawn by the user)
+  (state.work||[]).forEach((b,idx)=>{
+    const p=workToDisplay(w,b);
+    const el=document.createElement('div'); el.className='wk'; el.dataset.idx=idx;
+    const hrs=(b.e-b.s)/60;
+    el.innerHTML=`<div class="hnd t"></div><span class="lab">work · ${hrs.toFixed(hrs%1?1:0)}h</span>
+      <button class="x" title="Remove">×</button><div class="hnd b"></div>`;
+    el.title=`Work ${fmt12(b.s)}–${fmt12(b.e)} ${abbrFor(workZone())}`;
+    place(el,p.dow,p.a,p.b);
   });
-  const byDay={};
-  for(const e of evs)(byDay[e.dow]||(byDay[e.dow]=[])).push(e);
+
+  // classes
+  const list=instances(w), clash=findClashes(list);
+  const evs=list.map((it,i)=>{const zs=utcToZoned(it.start,S.displayTz),ze=utcToZoned(it.end,S.displayTz);
+    return {it,i,dow:zs.dow,a:zs.min,b:(ze.dow!==zs.dow?1440:ze.min),lane:0,lanes:1};});
+  const byDay={}; for(const e of evs)(byDay[e.dow]||(byDay[e.dow]=[])).push(e);
   for(const d in byDay){
-    const day=byDay[d].sort((x,y)=>x.a-y.a||x.b-y.b);
-    let cl=[],clEnd=-1;
-    const flush=()=>{const ends=[];
-      for(const e of cl){let L=0;while(ends[L]!==undefined&&ends[L]>e.a)L++;ends[L]=e.b;e.lane=L;}
+    const day=byDay[d].sort((x,y)=>x.a-y.a||x.b-y.b); let cl=[],end=-1;
+    const flush=()=>{const ends=[];for(const e of cl){let L=0;while(ends[L]!==undefined&&ends[L]>e.a)L++;ends[L]=e.b;e.lane=L;}
       for(const e of cl)e.lanes=ends.length;cl=[];};
-    for(const e of day){if(cl.length&&e.a>=clEnd)flush();cl.push(e);clEnd=Math.max(clEnd,e.b);}
+    for(const e of day){if(cl.length&&e.a>=end)flush();cl.push(e);end=Math.max(end,e.b);}
     if(cl.length)flush();
   }
   evs.forEach(({it,i,dow,a,b,lane,lanes})=>{
-    const zs=utcToZoned(it.start,S.displayTz),ze=utcToZoned(it.end,S.displayTz);
-    const hs=utcToZoned(it.start,'America/New_York'),he=utcToZoned(it.end,'America/New_York');
-    const col=colorFor(it.course.i);
-    const el=document.createElement('div');
+    const col=colorFor(it.course.i), el=document.createElement('div');
     el.className='ev'+(clash.has(i)?' clash':'');
     el.style.setProperty('--c',col);
-    el.style.setProperty('--evbg',`color-mix(in srgb, ${col} 11%, #fff)`);
-    el.style.setProperty('--evbd',`color-mix(in srgb, ${col} 32%, #fff)`);
-    el.innerHTML=`<b>${esc(it.course.code)}</b><i>${fmt12(zs.min)}–${fmt12(ze.min)}</i>`;
-    el.title=`${it.course.code} — ${it.course.title}\n${DAYS[hs.dow-1]} ${fmt12(hs.min)}–${fmt12(he.min)} ET (home)\n`
-      +`${DAYS[zs.dow-1]} ${fmt12(zs.min)}–${fmt12(ze.min)} ${abbrFor(S.displayTz)} (shown)\n`
-      +`${it.course.sch} · ${it.course.cr}cr · ${it.course.mode||'mode not published'}`;
+    el.style.setProperty('--evbg',`color-mix(in srgb, ${col} 12%, #fff)`);
+    el.style.setProperty('--evbd',`color-mix(in srgb, ${col} 34%, #fff)`);
+    const zs=utcToZoned(it.start,S.displayTz),ze=utcToZoned(it.end,S.displayTz);
+    el.innerHTML=`<b>${it.course.code}</b><i>${fmt12(zs.min)}–${fmt12(ze.min)}</i>
+      <button class="x" data-rm="${it.course.i}" title="Remove course">×</button>`;
+    el.title=`${it.course.code} — ${it.course.title}\n${it.course.sch} · ${it.course.cr}cr`;
     place(el,dow,a,b,lane,lanes);
   });
+  document.querySelectorAll('#cal .ev .x').forEach(x=>x.onclick=e=>{
+    e.stopPropagation(); state.selected=state.selected.filter(v=>v!==+x.dataset.rm); save(); renderAll();
+  });
+  document.querySelectorAll('#cal .wk .x').forEach(x=>x.onclick=e=>{
+    e.stopPropagation(); const i=+x.closest('.wk').dataset.idx;
+    state.work.splice(i,1); save(); renderAll();
+  });
+  wireDrag();
+  document.getElementById('wkLabel').textContent=`${shortDate(w)} – ${shortDate(w+6*DAY_MS)}`;
+
   const noon=zonedToUtc(d0.getUTCFullYear(),d0.getUTCMonth()+1,d0.getUTCDate(),12,0,'America/New_York');
   const off=(tzOffsetMs(new Date(noon),'America/New_York')-tzOffsetMs(new Date(noon),'America/Los_Angeles'))/3600000;
-  document.getElementById('tznote').innerHTML=
-    `Week of <b>${shortDate(w)}</b> in <b>${esc(state.term)}</b> — only courses whose session is running then. `
-    +`Eastern is <b>${off}h</b> ahead of Pacific this week; rows are laid out in <b>${abbrFor(S.displayTz)}</b>, `
-    +`the gutter reads the same instant in both zones, and the shaded band is 9–5 Pacific.`;
+  const wh=workHours();
+  document.getElementById('calfoot').innerHTML=
+    `Showing <b>${state.term}</b>, week of <b>${shortDate(w)}</b> — only courses running that week. `
+    +`Eastern is <b>${off}h</b> ahead of Pacific; the gutter reads both zones at once. `
+    +`Work blocks are stored in <b>${abbrFor(workZone())}</b> and total <b>${wh.toFixed(wh%1?1:0)}h</b> this week.`;
+  return {list,clash};
 }
 
-/* ═══ render: verdicts ═══ */
-function renderVerdicts(L,w){
-  const S=state.settings,T=totals(),W=[];
-  if(!state.selected.length)
-    W.push(['warn','·','Nothing selected yet. Use the Catalog — “Fits my week” narrows to courses that clear a Pacific workday.']);
+/* ═══════════ drag to draw / move / resize work ═══════════
+   Works entirely in DISPLAY space and commits to the work zone on release.
+   Two things this must not do: call setPointerCapture unguarded (it throws
+   NotFoundError whenever the browser doesn't consider the pointer active,
+   killing the gesture), or re-render the grid on every move (that destroys
+   the element being dragged and re-attaches every listener each frame). ═══ */
+function wireDrag(){
+  const yToMin=(col,clientY)=>{
+    const r=col.getBoundingClientRect();
+    const m=GRID.from+(clientY-r.top)/GRID.rowh*60;
+    return Math.max(GRID.from,Math.min(GRID.to,Math.round(m/SNAP)*SNAP));
+  };
+  const paint=(el,a,b)=>{
+    el.style.top=((a-GRID.from)/60*GRID.rowh)+'px';
+    el.style.height=Math.max(3,(b-a)/60*GRID.rowh-2)+'px';
+    const lab=el.querySelector('.lab');
+    if(lab) lab.textContent=`${fmt12(a)}–${fmt12(b)}`;
+  };
+  let drag=null;
 
+  GRID.cols.forEach(col=>{
+    col.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.ev')||e.target.tagName==='BUTTON') return;
+      try{ col.setPointerCapture(e.pointerId); }catch(_){ /* synthetic or already-released pointer */ }
+      const dow=+col.dataset.d, wkEl=e.target.closest('.wk');
+      const m=yToMin(col,e.clientY);
+      if(wkEl && wkEl.dataset.idx!==undefined){
+        const idx=+wkEl.dataset.idx;
+        const pos=workToDisplay(GRID.w,state.work[idx]);
+        const mode=e.target.classList.contains('hnd')
+          ? (e.target.classList.contains('t')?'top':'bot') : 'move';
+        drag={kind:mode,idx,col,dow,startY:m,a:pos.a,b:pos.b,a0:pos.a,b0:pos.b,el:wkEl};
+        wkEl.classList.add('drag');
+      }else{
+        drag={kind:'new',col,dow,anchor:m,a:m,b:m,el:null};
+      }
+      e.preventDefault();
+    });
+
+    col.addEventListener('pointermove',e=>{
+      if(!drag||drag.col!==col) return;
+      const m=yToMin(col,e.clientY), d=m-drag.startY;
+      if(drag.kind==='new'){
+        drag.a=Math.min(drag.anchor,m); drag.b=Math.max(drag.anchor,m);
+        if(!drag.el){
+          drag.el=document.createElement('div');
+          drag.el.className='wk ghost';
+          drag.el.innerHTML='<span class="lab"></span>';
+          col.appendChild(drag.el);
+        }
+      }else if(drag.kind==='move'){
+        const len=drag.b0-drag.a0;
+        drag.a=Math.max(GRID.from,Math.min(GRID.to-len,drag.a0+d));
+        drag.b=drag.a+len;
+      }else if(drag.kind==='top'){
+        drag.a=Math.min(drag.b0-SNAP,Math.max(GRID.from,drag.a0+d));
+      }else{
+        drag.b=Math.max(drag.a0+SNAP,Math.min(GRID.to,drag.b0+d));
+      }
+      if(drag.el) paint(drag.el,drag.a,drag.b);
+    });
+
+    const finish=()=>{
+      if(!drag||drag.col!==col) return;
+      const {kind,dow,a,b}=drag;
+      if(drag.el) drag.el.classList.remove('drag');
+      if(kind==='new' && drag.el) drag.el.remove();
+      if(b-a>=SNAP){
+        const p0=displayToWork(GRID.w,dow,a), p1=displayToWork(GRID.w,dow,b);
+        const block={day:p0.day, s:p0.min, e:(p1.day===p0.day?p1.min:1440)};
+        state.work=state.work||[];
+        if(kind==='new') state.work.push(block);
+        else state.work[drag.idx]=block;
+      }else if(kind!=='new'){
+        state.work.splice(drag.idx,1);   // dragged to nothing = delete
+      }
+      drag=null; save(); renderAll();
+    };
+    col.addEventListener('pointerup',finish);
+    col.addEventListener('pointercancel',finish);
+  });
+}
+/* ═══════════ verdicts ═══════════ */
+function renderVerdicts(list,clash){
+  const W=[], T=totals(), wh=workHours(), S=state.settings;
   const seen=new Set();
-  for(let i=0;i<L.list.length;i++)for(let j=i+1;j<L.list.length;j++){
-    if(L.list[i].start<L.list[j].end&&L.list[j].start<L.list[i].end){
-      const k=[L.list[i].course.i,L.list[j].course.i].sort().join('|');
-      if(seen.has(k))continue;seen.add(k);
-      W.push(['bad','✕',`<b>${esc(L.list[i].course.code)}</b> and <b>${esc(L.list[j].course.code)}</b> overlap and both run this week. You cannot take both.`]);
+  for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++)
+    if(list[i].start<list[j].end&&list[j].start<list[i].end){
+      const k=[list[i].course.i,list[j].course.i].sort().join('|');
+      if(seen.has(k))continue; seen.add(k);
+      W.push(['bad','✕',`<b>${list[i].course.code}</b> and <b>${list[j].course.code}</b> overlap this week — you cannot take both.`]);
     }
-  }
+  // work vs class collisions
+  const wb=workBlocksUTC(focusWeek());
+  for(const it of list) for(const x of wb)
+    if(it.start<x.end&&x.start<it.end){
+      W.push(['warn','!',`<b>${it.course.code}</b> runs inside one of your work blocks. Move the block or the course.`]); break; }
+  if(!state.work||!state.work.length) W.push(['warn','·','No work hours drawn yet — drag on the calendar to block them out.']);
+  else if(wh<S.target) W.push(['warn','!',`You've drawn <b>${wh.toFixed(wh%1?1:0)}h</b> of work against a <b>${S.target}h</b> target — <b>${(S.target-wh).toFixed(1)}h</b> short.`]);
+  else W.push(['ok','✓',`<b>${wh.toFixed(wh%1?1:0)}h</b> of work drawn — target met.`]);
   for(const[t,v]of Object.entries(T.perTerm))
-    if(v>S.termCap) W.push(['bad','✕',`<b>${esc(t)}</b> is <b>${v} credits</b> — over the part-time cap of ${S.termCap}.`]);
-
-  if(T.crAll&&T.letter<RULES.letterMin)
-    W.push([T.crAll>=RULES.totalMin?'bad':'warn','!',
-      `<b>${T.letter}</b> of the ${RULES.letterMin} required letter-eligible credits. Foundations are SAT/NCR and contribute none — and “Student Option” courses <b>default to pass/fail</b>, so each must be elected by the add/drop deadline.`]);
-  if(T.crAll>RULES.totalMax)
-    W.push(['bad','✕',`<b>${T.crAll} credits</b> exceeds the ${RULES.totalMax}-credit ceiling.`]);
-  if(T.xreg>RULES.xregMax)
-    W.push(['bad','✕',`<b>${T.xreg}</b> cross-registered credits — over the ${RULES.xregMax}-credit degree limit.`]);
-  if(T.field>RULES.fieldMax)
-    W.push(['bad','✕',`<b>${T.field}</b> field-experience credits — over the ${RULES.fieldMax}-credit limit.`]);
-  if(T.pce.length>1)
-    W.push(['warn','!',`You've selected <b>${T.pce.length}</b> PCE courses. Only one counts as the Program Core Experience; the others are ordinary electives.`]);
-  if(T.pce.length===1&&!letterCapable(T.pce[0]))
-    W.push(['warn','!',`<b>${esc(T.pce[0].code)}</b> is SAT/UNSAT, so your PCE contributes <b>zero</b> letter credits. T543 is the only letter-eligible PCE.`]);
-
-  if(L.deficit>0.01)
-    W.push([L.deficit>4?'bad':'warn',L.deficit>4?'✕':'!',
-      `Only <b>${L.work.placedH.toFixed(1)}h</b> of your <b>${L.work.targetH}h</b> week fits around this week's classes — short by <b>${L.deficit.toFixed(1)}h</b>.`]);
-  else if(L.active.length)
-    W.push(['ok','✓',`All <b>${L.work.targetH}h</b> of work fits in the week of ${shortDate(w)}, inside ${fmt12(toMin(S.wstart))}–${fmt12(toMin(S.wend))} ${abbrFor(S.wtz)}.`]);
-  if(L.totalH>75)W.push(['bad','✕',`<b>${L.totalH.toFixed(0)}h</b> committed this week — past sustainable alongside a full-time job.`]);
-  else if(L.totalH>RULES.sustainable)W.push(['warn','!',`<b>${L.totalH.toFixed(0)}h</b> committed this week. Heavy but survivable.`]);
-
-  for(const c of L.active){
-    if(compressionCapped(c))W.push(['bad','✕',
-      `<b>${esc(c.code)}</b> compresses ${c.cr} credits into ${courseWeeks(c)} week${courseWeeks(c)===1?'':'s'} — an intensive. Study estimate capped at <b>${weeklyStudy(c).toFixed(0)}h/week</b>; treat it as a full-time week.`]);
-    else if(compression(c)>1.4)W.push(['warn','!',
-      `<b>${esc(c.code)}</b> runs at <b>${compression(c).toFixed(1)}×</b> the weekly pace of a full-term course — about <b>${weeklyStudy(c).toFixed(1)}h/week</b> of study.`]);
-  }
-  const noDate=sel().filter(c=>!c.d0);
-  if(noDate.length)W.push(['warn','!',
-    `<b>${noDate.length}</b> selected course${noDate.length===1?' has':'s have'} no published date range (${noDate.slice(0,3).map(c=>esc(c.code)).join(', ')}${noDate.length>3?'…':''}), so ${noDate.length===1?'it is':'they are'} excluded from the week grid and load maths.`]);
-  const lots=sel().filter(c=>c.lottery);
-  if(lots.length)W.push(['warn','!',
-    `<b>${lots.length}</b> selected course${lots.length===1?' is':'s are'} lottery-allocated (${lots.slice(0,3).map(c=>esc(c.code)).join(', ')}${lots.length>3?'…':''}) — a place isn't guaranteed.`]);
-  const consent=sel().filter(c=>/consent/i.test(c.consent||'')&&!/no consent/i.test(c.consent||''));
-  if(consent.length)W.push(['warn','!',
-    `<b>${consent.length}</b> selected course${consent.length===1?' requires':'s require'} instructor consent (${consent.slice(0,3).map(c=>esc(c.code)).join(', ')}${consent.length>3?'…':''}).`]);
-
-  document.getElementById('warns').innerHTML=W.length
-    ?W.map(([k,ic,t])=>`<li class="${k}"><span class="ic">${ic}</span><span>${t}</span></li>`).join('')
-    :'<li class="ok"><span class="ic">✓</span><span>Nothing to flag.</span></li>';
+    if(v>S.termCap) W.push(['bad','✕',`<b>${t}</b> is <b>${v} credits</b>, over the part-time cap of ${S.termCap}.`]);
+  if(T.crAll&&T.letter<16)
+    W.push(['warn','!',`<b>${T.letter}</b> of 16 letter-eligible credits. Foundations give none, and "Student Option" courses <b>default to pass/fail</b> — elect each one by add/drop.`]);
+  document.getElementById('warns').innerHTML=W.map(([k,ic,t])=>
+    `<li class="${k}"><span class="ic">${ic}</span><span>${t}</span></li>`).join('');
 }
 
-/* ═══ orchestrate ═══ */
+/* ═══════════ orchestrate ═══════════ */
 function renderAll(){
   _abbr={};_fw=null;
-  const w=focusWeek(),L=weekLoad(w),clash=findClashes(L.list);
-  const clashCodes=new Set();clash.forEach(i=>clashCodes.add(L.list[i].course.i));
-  renderReqs();renderGantt();renderTL();
-  renderCatalog();renderPlan(clashCodes);
-  renderGrid(L.list,clash,L.work,w);
-  renderVerdicts(L,w);
+  const r=renderGrid();
+  const clashCodes=new Set(); r.clash.forEach(i=>clashCodes.add(r.list[i].course.i));
+  renderStats(null, clashCodes.size?Math.ceil(clashCodes.size/2):0);
+  renderList(clashCodes);
+  renderReqs(); renderGantt(); renderVerdicts(r.list,r.clash);
   const sched=CATALOG.filter(c=>c.days.length&&c.start).length;
-  const dated=CATALOG.filter(c=>c.d0).length;
-  const bySch={};for(const c of CATALOG)bySch[c.sch]=(bySch[c.sch]||0)+1;
   document.getElementById('dataNote').innerHTML=
-    `Loaded: <b>${CATALOG.length.toLocaleString()}</b> sections across ${Object.keys(bySch).length} schools, `
-    +`Fall 2026 and Spring 2027 `
-    +`(${Object.entries(bySch).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+' '+v).join(' · ')}). `
-    +`<b>${sched.toLocaleString()}</b> publish a day-and-time pattern and can be placed on the calendar; `+`<b>${dated.toLocaleString()}</b> carry a date range. `
-    +`Sections without a day-and-time pattern (including all 2,293 MIT rows) stay searchable and count `
-    +`toward the degree maths, but cannot be drawn on the calendar. `
-    +`my.harvard publishes no room or building data at all, so <b>location isn't available</b>; the closest is `
-    +`instruction mode, and only where the registrar filled it in.`;
-  document.getElementById('foot').innerHTML=
-    `Times resolved from IANA zones on real dates — daylight saving computed, never assumed.<br>`
-    +`Collisions test session date ranges as well as clock times. Degree rules follow the HGSE Student Handbook; verify against the 2026-27 edition.`;
+    `<b>${sched.toLocaleString()}</b> sections publish a day and time and are searchable here, out of `
+    +`${CATALOG.length.toLocaleString()} across 12 schools, Fall 2026 and Spring 2027. `
+    +`my.harvard publishes no room or building data, so location isn't available.`;
 }
 
-/* ═══ wiring ═══ */
-document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));
-  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
-  b.classList.add('on');document.getElementById(b.dataset.p).classList.add('on');
+/* ═══════════ wiring ═══════════ */
+for(const [btn,dw] of [['btn-degree','dw-degree'],['btn-term','dw-term'],['btn-data','dw-data']]){
+  document.getElementById(btn).onclick=()=>{
+    const el=document.getElementById(dw), open=el.classList.contains('on');
+    document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('on'));
+    document.querySelectorAll('.barbtn').forEach(b=>b.classList.remove('on'));
+    if(!open){ el.classList.add('on'); document.getElementById(btn).classList.add('on'); }
+  };
+}
+document.getElementById('wk-prev').onclick=()=>{const W=termWeeks(state.term);const i=W.indexOf(focusWeek());
+  state.week=i>0?W[i-1]:(W[0]||focusWeek())-7*DAY_MS;save();renderAll();};
+document.getElementById('wk-next').onclick=()=>{const W=termWeeks(state.term);const i=W.indexOf(focusWeek());
+  state.week=(i>=0&&i<W.length-1)?W[i+1]:focusWeek()+7*DAY_MS;save();renderAll();};
+document.querySelectorAll('#tzseg button').forEach(b=>{
+  b.classList.toggle('on',b.dataset.tz===state.settings.displayTz);
+  b.onclick=()=>{document.querySelectorAll('#tzseg button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');state.settings.displayTz=b.dataset.tz;save();renderAll();};
 });
-document.querySelectorAll('#planScope button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('#planScope button').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on');state.scope=b.dataset.s;
-  if(b.dataset.s!=='all'){state.term=b.dataset.s;state.week=null;}
-  save();renderAll();
-});
-function chips(id,opts,key,onSet){
+function chips(id,opts,key){
   const el=document.getElementById(id);
-  el.innerHTML=opts.map(o=>`<button class="fchip${state.filters[key]===o.v?' on':''}" data-v="${o.v===null?'':esc(o.v)}">${o.l}</button>`).join('');
+  el.innerHTML=opts.map(o=>`<button class="fchip${state.filters[key]===o.v?' on':''}" data-v="${o.v}">${o.l}</button>`).join('');
   el.querySelectorAll('.fchip').forEach(b=>b.onclick=()=>{
-    const v=b.dataset.v||null;
-    state.filters[key]=state.filters[key]===v?null:v;
-    save();chips(id,opts,key,onSet);if(onSet)onSet();renderCatalog();
-  });
+    state.filters[key]=state.filters[key]===b.dataset.v?null:b.dataset.v;
+    save();chips(id,opts,key);renderAll();});
 }
-chips('f-term',TERMS.map(t=>({l:t.replace('20',"'"),v:t})),'term',()=>{
-  if(state.filters.term){state.term=state.filters.term;state.week=null;renderAll();}});
-chips('f-grade',[{l:'Letter-eligible',v:'letter'},{l:'Pass/fail only',v:'pf'}],'grade');
+chips('f-term',TERMS.map(t=>({l:t.replace('20',"'"),v:t})),'term');
+chips('f-grade',[{l:'Letter-eligible',v:'letter'},{l:'Pass/fail',v:'pf'}],'grade');
 chips('f-fit',[{l:'Done by 9am PT',v:'beforePT'},{l:'Starts 2pm PT+',v:'afterPT'}],'fit');
-chips('f-only',[{l:'On a calendar',v:'sched'},{l:'Has dates',v:'dated'},
-  {l:'Cross-reg open',v:'xreg'},{l:'No lottery',v:'nolot'}],'only');
-const schSel=document.getElementById('f-sch');
-schSel.innerHTML='<option value="">All schools</option>'+RAW.dict.sch.filter(Boolean)
-  .map(s=>`<option value="${s}">${s} — ${SCHOOLS[s]||s}</option>`).join('');
-schSel.value=state.filters.sch||'';
-schSel.onchange=()=>{state.filters.sch=schSel.value||'';save();renderCatalog();};
-document.getElementById('q').oninput=e=>{state.q=e.target.value;renderCatalog();};
-
-function dayChecks(el,selD,cb){
-  el.innerHTML=DAYS.map((d,i)=>`<label><input type="checkbox" value="${i+1}" ${selD.includes(i+1)?'checked':''}>${DL[i]}</label>`).join('');
-  el.querySelectorAll('input').forEach(x=>x.onchange=()=>cb([...el.querySelectorAll('input:checked')].map(y=>+y.value)));
-}
-function bindSettings(){
-  const S=state.settings;
-  const map={'s-target':['target',Number],'s-wtz':['wtz',String],'s-wstart':['wstart',String],
-    's-wend':['wend',String],'s-buf':['buf',Number],'s-min':['minblk',Number],
-    's-study':['studyPerCredit',Number],'s-cap':['termCap',Number],
-    'g-from':['gridFrom',String],'g-to':['gridTo',String]};
-  for(const[id,[k,cast]]of Object.entries(map)){
-    const el=document.getElementById(id);el.value=S[k];
-    el.oninput=()=>{S[k]=cast(el.value);save();renderAll();};
-  }
-  dayChecks(document.getElementById('s-wdays'),S.wdays,v=>{S.wdays=v;save();renderAll();});
-  document.querySelectorAll('#tzseg button').forEach(b=>{
-    b.classList.toggle('on',b.dataset.tz===S.displayTz);
-    b.onclick=()=>{document.querySelectorAll('#tzseg button').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');S.displayTz=b.dataset.tz;save();renderAll();};
-  });
-}
-document.getElementById('io-export').onclick=()=>{
-  document.getElementById('io').value=JSON.stringify({selected:sel().map(c=>({sch:c.sch,term:c.term,code:c.code,sec:c.sec})),settings:state.settings},null,1);
-};
+const ss=document.getElementById('f-sch');
+ss.innerHTML='<option value="">All schools</option>'+RAW.dict.sch.filter(Boolean).map(s=>`<option value="${s}">${s} — ${SCHOOLS[s]||s}</option>`).join('');
+ss.value=state.filters.sch||''; ss.onchange=()=>{state.filters.sch=ss.value;save();renderAll();};
+document.getElementById('q').oninput=e=>{state.q=e.target.value;renderAll();};
+document.getElementById('io-export').onclick=()=>{document.getElementById('io').value=
+  JSON.stringify({selected:sel().map(c=>({sch:c.sch,term:c.term,code:c.code,sec:c.sec})),work:state.work,settings:state.settings},null,1);};
 document.getElementById('io-import').onclick=()=>{
   const ta=document.getElementById('io');
   try{const o=JSON.parse(ta.value);
-    if(!Array.isArray(o.selected))throw new Error('expected { "selected": [ … ] }');
     const idx=new Map(CATALOG.map(c=>[c.sch+'|'+c.term+'|'+c.code+'|'+(c.sec||''),c.i]));
-    state.selected=o.selected.map(x=>idx.get(x.sch+'|'+x.term+'|'+x.code+'|'+(x.sec||''))).filter(v=>v!==undefined);
-    if(o.settings)state.settings=Object.assign({},DEFAULTS,o.settings);
-    state.week=null;save();bindSettings();renderAll();
-    ta.value='✓ loaded '+state.selected.length+' courses';
-  }catch(e){ta.value='✗ '+e.message+'\n\n'+ta.value;}
+    state.selected=(o.selected||[]).map(x=>idx.get(x.sch+'|'+x.term+'|'+x.code+'|'+(x.sec||''))).filter(v=>v!==undefined);
+    state.work=o.work||[]; if(o.settings)state.settings=Object.assign({},DEFAULTS,o.settings);
+    state.week=null;save();renderAll();ta.value='✓ loaded';
+  }catch(e){ta.value='✗ '+e.message;}
 };
-document.getElementById('io-reset').onclick=()=>{
-  if(!confirm('Clear all selected courses?'))return;
-  state.selected=[];state.week=null;save();renderAll();
-};
+document.getElementById('io-reset').onclick=()=>{if(!confirm('Clear your courses and work hours?'))return;
+  state.selected=[];state.work=[];state.week=null;save();renderAll();};
 document.getElementById('io-ics').onclick=()=>{
   const stamp=t=>new Date(t).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
   const BY=['MO','TU','WE','TH','FR','SA','SU'],now=stamp(Date.now());
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//two-coast-planner//EN','CALSCALE:GREGORIAN'];
-  let n=0;
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//two-coast-planner//EN','CALSCALE:GREGORIAN'];let n=0;
   for(const c of sel()){
     if(!c.days.length||!c.start||!c.d0)continue;
     const cs=parseISO(c.d0),until=stamp(parseISO(c.d1||c.d0)+DAY_MS-60000);
     for(const d of c.days){
-      let first=mondayOf(cs)+(d-1)*DAY_MS;
-      if(first<cs)first+=7*DAY_MS;
+      let first=mondayOf(cs)+(d-1)*DAY_MS; if(first<cs)first+=7*DAY_MS;
       const dd=new Date(first),sM=toMin(c.start),eM=toMin(c.end);
       const s=zonedToUtc(dd.getUTCFullYear(),dd.getUTCMonth()+1,dd.getUTCDate(),Math.floor(sM/60),sM%60,'America/New_York');
       const e=zonedToUtc(dd.getUTCFullYear(),dd.getUTCMonth()+1,dd.getUTCDate(),Math.floor(eM/60),eM%60,'America/New_York');
-      ics.push('BEGIN:VEVENT',`UID:${c.code.replace(/\s/g,'')}-${c.term.replace(/\s/g,'')}-${d}@planner`,
-        `DTSTAMP:${now}`,`DTSTART:${stamp(s)}`,`DTEND:${stamp(e)}`,
-        `RRULE:FREQ=WEEKLY;BYDAY=${BY[d-1]};UNTIL=${until}`,
-        `SUMMARY:${c.code} — ${c.title}`,
-        `DESCRIPTION:${c.sch} · ${c.cr}cr · ${c.sess||''} · ${c.mode||'mode not published'}`,'END:VEVENT');
-      n++;
+      ics.push('BEGIN:VEVENT',`UID:${c.code.replace(/\s/g,'')}-${d}@planner`,`DTSTAMP:${now}`,
+        `DTSTART:${stamp(s)}`,`DTEND:${stamp(e)}`,`RRULE:FREQ=WEEKLY;BYDAY=${BY[d-1]};UNTIL=${until}`,
+        `SUMMARY:${c.code} — ${c.title}`,`DESCRIPTION:${c.sch} · ${c.cr}cr`,'END:VEVENT');n++;
     }
   }
   ics.push('END:VCALENDAR');
-  if(!n){document.getElementById('icsNote').textContent='No dated, scheduled courses selected yet.';return;}
+  if(!n)return;
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([ics.join('\r\n')],{type:'text/calendar'}));
-  a.download='harvard-plan.ics';a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-  document.getElementById('icsNote').textContent=`Downloaded harvard-plan.ics — ${n} recurring events.`;
+  a.download='harvard-plan.ics';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 };
-bindSettings();
+if(!state.work) state.work=[];
 renderAll();
 </script>
 
