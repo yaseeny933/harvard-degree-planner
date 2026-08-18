@@ -139,7 +139,8 @@
   .clist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;
     max-height:600px;overflow-y:auto;padding-right:3px}
   .crow{--c:var(--ink-4);display:flex;gap:9px;align-items:flex-start;padding:9px 10px 9px 0;
-    border:1px solid var(--line);border-radius:11px;position:relative;overflow:hidden;background:var(--surface)}
+    border:1px solid var(--line);border-radius:11px;position:relative;overflow:hidden;background:var(--surface);
+    flex:0 0 auto}   /* the list is a scrolling flex column — without this, rows shrink and clip */
   .crow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);opacity:.3}
   .crow.on::before{opacity:1}
   .crow.on{border-color:#dccbd0;box-shadow:var(--shadow-s)}
@@ -505,10 +506,10 @@ function load(){
     if(r){const s=JSON.parse(r);
       return {selected:s.selected||[],settings:Object.assign({},DEFAULTS,s.settings||{}),
         scope:s.scope||'all',week:s.week||null,term:s.term||TERMS[0],
-        filters:s.filters||{term:null,sch:'',grade:null,fit:null,only:null},q:''};}
+        filters:s.filters||{term:null,sch:'',grade:null,fit:null,only:'sched'},q:''};}
   }catch(e){}
   return {selected:[],settings:Object.assign({},DEFAULTS),scope:'all',week:null,term:TERMS[0],
-    filters:{term:null,sch:'',grade:null,fit:null,only:null},q:''};
+    filters:{term:null,sch:'',grade:null,fit:null,only:'sched'},q:''};
 }
 function save(){try{localStorage.setItem('ldit.v1',JSON.stringify({selected:state.selected,
   settings:state.settings,scope:state.scope,week:state.week,term:state.term,filters:state.filters}));}catch(e){}}
